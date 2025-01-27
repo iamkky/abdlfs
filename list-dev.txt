@@ -28,4 +28,6 @@ cdrtools-3.01.tar.bz2
 autoconf-2.69.tar.xz
 automake-1.15.tar.xz
 elfutils-0.165.tar.bz2
-git-2.1.0.tar.xz
+gettext-0.17.tar.gz
+tcl8.5.7-src.tar.gz
+git-2.33.8.tar.xz

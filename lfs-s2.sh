@@ -49,16 +49,16 @@ echo
 # 6.7. Linux-3.10.104 API Headers
 # Upgraded to
 # 6.7. Linux-3.16.61 API Headers
+# Upgraded to
+# 6.7. Linux-5.19.9 API Headers
 
 	startStep 6.7-"$KERNEL_VERSION"-api-headers
 	tar -xJf "$KERNEL_VERSION".tar.xz; cd "$KERNEL_VERSION"
 	make mrproper
-	if [ DD${MKTEST}DD = DDYESDD ]
-	then
-		make headers_check &> ${LOGS}/check-${LFSSTEP}.log
-	fi
-	make INSTALL_HDR_PATH=dest headers_install
-	cp -rv dest/include/* /usr/include
+	make headers
+	find usr/include -name '.*' -delete
+	rm -f usr/include/Makefile*
+	cp -rv usr/include/* /usr/include
 	cd /sources; rm -rf "$KERNEL_VERSION"
 
 # 6.8 manpages skiped - Abud
@@ -95,7 +95,7 @@ echo
 	    --enable-kernel=2.6.32 \
 	    --enable-obsolete-rpc
 
-	make
+	make $MAKEJOBS
 	
 	if [ DD${MKTEST}DD = DDYESDD ]
 	then
@@ -285,7 +285,7 @@ EOF
 	
 	../binutils-2.24/configure --prefix=/usr  --enable-shared --disable-werror
 
-	make tooldir=/usr
+	make $MAKEJOBS tooldir=/usr
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -306,7 +306,7 @@ EOF
 	tar -xjf gmp-6.0.0a.tar.bz2; cd gmp-6.0.0
 
 	./configure --prefix=/usr --enable-cxx --docdir=/usr/share/doc/gmp-6.0.0a
-	make
+	make $MAKEJOBS
 	
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -339,7 +339,7 @@ EOF
 	rm -f ../mpfr-3.1.3-upstream_fixes-1.patch
  
 	./configure --prefix=/usr --enable-thread-safe --docdir=/usr/share/doc/mpfr-3.1.3
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -369,7 +369,7 @@ EOF
 
 	./configure --prefix=/usr --docdir=/usr/share/doc/mpc-1.0.3
 
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -414,7 +414,7 @@ EOF
 		--disable-multilib --disable-bootstrap \
 		--with-system-zlib
 
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -688,7 +688,7 @@ EOF
 
 	./configure --prefix=/usr  --enable-no-install-program=kill,uptime
 
-	make
+	make $MAKEJOBS
 
 	# Abud - Fixme
 	#	make NON_ROOT_USERNAME=nobody check-root
@@ -846,7 +846,7 @@ EOF
 	./configure --prefix=/usr --bindir=/bin \
 		--htmldir=/usr/share/doc/bash-4.4.18 --without-bash-malloc
 
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -872,7 +872,7 @@ EOF
 	startStep 6.29-libtool-2.2.6a
 	tar -xzf libtool-2.2.6a.tar.gz; cd libtool-2.2.6
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -970,7 +970,7 @@ EOF
 
 	make -f Makefile-libbz2_so
 	make clean
-	make
+	make $MAKEJOBS
 	make PREFIX=/usr install
 
 	cp -v bzip2-shared /bin/bzip2
@@ -992,7 +992,7 @@ EOF
 	touch man/diff.1
 
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 
 	cd /sources; rm -rf diffutils-2.8.1
@@ -1003,7 +1003,7 @@ EOF
 	tar -xzf file-5.03.tar.gz ; cd file-5.03
 
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -1023,7 +1023,7 @@ EOF
 	tar -xjf gawk-3.1.7.tar.bz2 ; cd gawk-3.1.7
 
 	./configure --prefix=/usr --libexecdir=/usr/lib
-	make
+	make $MAKEJOBS
 	
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -1048,7 +1048,7 @@ EOF
 	tar -xzf findutils-4.4.2.tar.gz ; cd findutils-4.4.2
 	
 	./configure --prefix=/usr --libexecdir=/usr/lib/findutils  --localstatedir=/var/lib/locate
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual checl
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -1133,7 +1133,7 @@ EOF
 	tar -xzf gzip-1.6.tar.gz ; cd gzip-1.6
 
 	./configure --prefix=/usr --bindir=/bin
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -1208,7 +1208,7 @@ EOF
 	tar -xzf make-4.0.tar.gz ; cd make-4.0
 
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual checl
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -1495,7 +1495,7 @@ EOF
 	echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
 	./configure --prefix=/usr --enable-multibyte
 
-	make
+	make $MAKEJOBS
 
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
@@ -1537,14 +1537,14 @@ EOF
 # Added
 # Linux-3.16.61 perf
 
-	startStep 6.7-"$KERNEL_VERSION"-perf
-	tar -xJf "$KERNEL_VERSION".tar.xz; cd "$KERNEL_VERSION"
-	if [ "$KERNEL_VERSION" = "linux-3.19.8" ]
-	then
-		patch -s -p1 < ../linux-3.19.8-perf-builtin-report.patch
-	fi
-	make -C tools/perf DESTDIR=/usr install
-	cd /sources; rm -rf "$KERNEL_VERSION"
+	#startStep 6.7-"$KERNEL_VERSION"-perf
+	#tar -xJf "$KERNEL_VERSION".tar.xz; cd "$KERNEL_VERSION"
+	#if [ "$KERNEL_VERSION" = "linux-3.19.8" ]
+	#then
+	#	patch -s -p1 < ../linux-3.19.8-perf-builtin-report.patch
+	#fi
+	#make -C tools/perf DESTDIR=/usr install
+	#cd /sources; rm -rf "$KERNEL_VERSION"
 
 # Added bnx2-firmware
 

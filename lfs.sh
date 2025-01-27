@@ -6,7 +6,8 @@
 # lfs-s4.sh		-	Dev Only Extensions
 # lfs-s4-cross.sh	-	Cross Tools Extensions
 
-export KERNEL_VERSION="linux-3.16.61"
+export KERNEL_VERSION="linux-5.19.9"
+#export KERNEL_VERSION="linux-3.16.61"
 #export KERNEL_VERSION="linux-3.19.8"
 
 #BUILD_CROSS_TOOLS="yes"
@@ -43,7 +44,7 @@ chown -v root.root $LFS
 
 # Toolschain creation
 echo; echo 'AbdLFS: Executing lfs-s1.sh';echo
-env -i KERNEL_VERSION="$KERNEL_VERSION" LFS=$LFS HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' WCACHE="$WCACHE" ./lfs-s1.sh
+env -i KERNEL_VERSION="$KERNEL_VERSION" LFS=$LFS HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' WCACHE="$WCACHE" MAKEJOBS="$MAKEJOBS" ./lfs-s1.sh
 
 mount -vt devpts devpts $LFS/dev/pts
 mount -vt tmpfs shm $LFS/dev/shm
@@ -52,13 +53,13 @@ mount -vt sysfs sysfs $LFS/sys
 
 # System creation
 echo; echo 'AbdLFS: Executing lfs-s2.sh';echo
-chroot "$LFS" $LFS/tools/bin/env -i KERNEL_VERSION="$KERNEL_VERSION" LFS="$LFS" HOME=/root TERM="$TERM" PS1='\u:\w\$ ' \
+chroot "$LFS" $LFS/tools/bin/env -i KERNEL_VERSION="$KERNEL_VERSION" LFS="$LFS" HOME=/root TERM="$TERM" PS1='\u:\w\$ ' MAKEJOBS="$MAKEJOBS" \
 	PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin:/prereqs/bin $LFS/tools/bin/bash --login +h \
 	-c 'source /lfs-s2.sh'
 
 # Common extensions
 echo; echo 'AbdLFS: Executing lfs-s3-ext.sh';echo
-chroot "$LFS" /usr/bin/env -i KERNEL_VERSION="$KERNEL_VERSION" HOME=/root TERM="$TERM" PS1='\u:\w\$ ' \
+chroot "$LFS" /usr/bin/env -i KERNEL_VERSION="$KERNEL_VERSION" HOME=/root TERM="$TERM" PS1='\u:\w\$ ' MAKEJOBS="$MAKEJOBS" \
 	PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin /bin/bash --login +h \
 	-c 'source /lfs-s3-ext.sh'
 
@@ -106,7 +107,7 @@ mount -vt sysfs sysfs $LFS/sys
 ### lfs-s4.sh is reserved to dev only stuff
 ###
 echo; echo 'AbdLFS: Executing lfs-s4.sh';echo
-chroot "$LFS" /usr/bin/env -i KERNEL_VERSION="$KERNEL_VERSION" HOME=/root TERM="$TERM" PS1='\u:\w\$ ' \
+chroot "$LFS" /usr/bin/env -i KERNEL_VERSION="$KERNEL_VERSION" HOME=/root TERM="$TERM" PS1='\u:\w\$ ' MAKEJOBS="$MAKEJOBS" \
 	PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin /bin/bash --login +h \
 	-c 'source /lfs-s4.sh'
 ### End of dev extras part

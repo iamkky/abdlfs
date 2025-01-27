@@ -130,7 +130,7 @@ echo
 	tar -xzf gawk-4.0.2.tar.gz; cd gawk-4.0.2
 
 	./configure --prefix=$LFS/prereqs
-	make
+	make $MAKEJOBS
 	make install
 	
 	cd ..; rm -rf gawk-4.0.2
@@ -142,7 +142,7 @@ echo
 	startStep "xz-5.2.2-prereq"
 	tar -xzf xz-5.2.2.tar.gz; cd xz-5.2.2
 	./configure --prefix=$LFS/prereqs
-	make
+	make $MAKEJOBS
 	make install
 	cd ..; rm -rf xz-5.2.2
 
@@ -167,7 +167,7 @@ echo
 		--target=$LFS_TGT \
 		--disable-nls \
 		--disable-werror
-	make
+	make $MAKEJOBS
 		#--with-lib-path=$LFS/tools/lib \
 		#--with-sysroot=$LFS \
 		#--prefix=/tools \
@@ -224,7 +224,7 @@ echo
 		--disable-libstdcxx \
 		--enable-languages=c,c++
 
-	make
+	make $MAKEJOBS
 	make install-strip
 
 	cd ..; rm -rf gcc-5.2.0; rm -rf gcc-build
@@ -240,8 +240,9 @@ echo
 		     -Dman1dir=$tmpperldir/man1 -Dman3dir=$tmpperldir/man3 -Dpager="/usr/bin/less -isR" \
 		     -Dlocincpth="/usr/include" \
 		     -Dlibpth="/usr/lib"
-	make
+	make $MAKEJOBS
 	make install
+	export PERL5LIB=/tools/tmpperl/lib/5.10.0/x86_64-linux
 	cd ..; rm -rf perl-5.10.0
 
 # 5.6. Linux 2.6.30.2 Api Headers
@@ -257,9 +258,14 @@ echo
 	cd "$KERNEL_VERSION"
 
 	make mrproper
-	make PATH=$tmpperldir/bin:$PATH headers_check
-	make PATH=$tmpperldir/bin:$PATH INSTALL_HDR_PATH=dest headers_install
-	cp -rv dest/include/* $LFS/tools/include
+	make headers
+	find usr/include -name '.*' -delete
+	rm -f usr/include/Makefile*
+	cp -rv usr/include/* $LFS/tools/include
+
+	#make PATH=$tmpperldir/bin:$PATH headers_check
+	#make PATH=$tmpperldir/bin:$PATH INSTALL_HDR_PATH=dest headers_install
+	#cp -rv dest/include/* $LFS/tools/include
 
 	cd ..; rm -rf "$KERNEL_VERSION"
 
@@ -301,7 +307,7 @@ echo
 		#--prefix=$LFS/tools/gcc \
 		#--prefix=$LFS/tools \
 		#--with-headers=$LFS/tools/include \
-	make
+	make $MAKEJOBS
 	make install
 
 	cd ..; rm -rf glibc-2.23; rm -rf glibc-build
@@ -362,7 +368,7 @@ echo
 	    --disable-libstdcxx-pch         \
 	    --with-gxx-include-dir=$LFS/tools/$LFS_TGT/include/c++/5.2.0
 
-	make
+	make $MAKEJOBS
 	make install
 
 	cd ..; rm -rf gcc-5.2.0; rm -rf gcc-build
@@ -393,7 +399,7 @@ cd $LFS/sources
 		--disable-werror \
 		--with-lib-path=$LFS/tools/lib
 
-	make
+	make $MAKEJOBS
 
 	make install
 
@@ -468,7 +474,7 @@ cd $LFS/sources
 		--disable-libgomp \
 
 
-	make
+	make $MAKEJOBS
 	make install
 
 	ln -vs gcc $LFS/tools/bin/cc
@@ -522,6 +528,7 @@ cd $LFS/sources
 	tar -xzf dejagnu-1.4.4.tar.gz; cd dejagnu-1.4.4
 
 	./configure --prefix=$LFS/tools
+	make
 	make install
 	#make check
 
@@ -551,7 +558,7 @@ cd $LFS/sources
 
 #	patch -Np1 -i ../bash-4.0-fixes-3.patch
 	./configure --prefix=$LFS/tools --without-bash-malloc
-	make
+	make $MAKEJOBS
 	#make tests
 	make install
 	ln -vs bash $LFS/tools/bin/sh
@@ -563,7 +570,7 @@ cd $LFS/sources
 	startStep "bzip2-1.0.5.tar.gz"
 
 	tar -xzf bzip2-1.0.5.tar.gz; cd bzip2-1.0.5
-	make
+	make $MAKEJOBS
 	make PREFIX=$LFS/tools install
 	cd $LFS/sources; rm -rf bzip2-1.0.5
 
@@ -575,7 +582,7 @@ cd $LFS/sources
 	tar -xzf coreutils-7.4.tar.gz; cd coreutils-7.4
 	PATH=$tmpperldir/bin:$PATH
 	./configure --prefix=$LFS/tools --enable-install-program=hostname
-	make
+	make $MAKEJOBS
 	#make RUN_EXPENSIVE_TESTS=yes check
 	make install
 	cp -v src/su $LFS/tools/bin/su-tools
@@ -588,7 +595,7 @@ cd $LFS/sources
 
 	tar -xzf diffutils-2.8.1.tar.gz; cd diffutils-2.8.1
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	make install
 	cd $LFS/sources; rm -rf diffutils-2.8.1
 
@@ -598,7 +605,7 @@ cd $LFS/sources
 
 	tar -xzf findutils-4.4.2.tar.gz; cd findutils-4.4.2
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	#make check
 	make install
 	cd $LFS/sources; rm -rf findutils-4.4.2
@@ -609,7 +616,7 @@ cd $LFS/sources
 
 	tar -xjf gawk-3.1.7.tar.bz2; cd gawk-3.1.7
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	#make check
 	make install
 	cd $LFS/sources; rm -rf gawk-3.1.7
@@ -664,7 +671,7 @@ cd $LFS/sources
 	startStep "make-4.0.tar.gz"
 	tar -xzf make-4.0.tar.gz; cd make-4.0
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	make install
 	cd $LFS/sources; rm -rf make-4.0
 
@@ -715,7 +722,7 @@ cd $LFS/sources
 	startStep xz-5.2.2
 	tar -xzf xz-5.2.2.tar.gz; cd xz-5.2.2
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf xz-5.2.2
 

@@ -62,7 +62,7 @@ cd $cdir
 	startStep groff-1.20.1
 	tar -xzf groff-1.20.1.tar.gz; cd groff-1.20.1
 	PAGE=A4 ./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make docdir=/usr/share/doc/groff-1.20.1 install
 	ln -sv eqn /usr/bin/geqn
 	ln -sv tbl /usr/bin/gtbl
@@ -186,11 +186,48 @@ cd $cdir
 	make install
 	cd $cdir; rm -rf subversion-1.6.16
 
+# Added (20250125)
+# msgfmt (required by git-2.33.8)
+
+	startStep "msgfmt (from gettext-0.17)"
+
+	tar -xf gettext-0.17.tar.gz; cd gettext-0.17
+	cd gettext-tools
+	./configure --prefix=/usr --disable-shared
+	make -C gnulib-lib
+	make -C src msgfmt
+	cp -v src/msgfmt /usr/bin
+
+	cd $cdir; rm -rf gettext-0.17
+
+
+# Added (20250125)
+# TCL8.5.7 (Required by git-2.33.8)
+
+	startStep "tcl8.5.7-src.tar.gz"
+
+	tar -xzf tcl8.5.7-src.tar.gz
+	cd tcl8.5.7
+	cd unix
+	./configure --prefix=/ust
+	make
+	make install
+	make install-private-headers
+
+	#chmod -v u+w $LFS/tools/lib/libtcl8.5.so
+	ln -sv tclsh8.5 /usr/bin/tclsh
+
+	cd $cdir; rm -rf tcl8.5.7
+	# Ok
+
 # Added 20230812
 # Git-2.1.0
+# Upgraded
+# Git-2.33.8 (2025-01-25)
+# From https://www.kernel.org/pub/software/scm/git/git-2.33.8.tar.xz
 
-	startStep git-2.1.0
-	tar -xf git-2.1.0.tar.xz ; cd git-2.1.0
+	startStep git-2.33.8
+	tar -xf git-2.33.8.tar.xz ; cd git-2.33.8
 	sed -i "/BSD_SOURCE/d" git-compat-util.h
 	# Adding /tools/bin to access msgfmt from toolchain gettext:w
 	SAVEDPATH=$PATH
@@ -199,7 +236,7 @@ cd $cdir
 	make
 	make install
 	export PATH=$SAVEDPATH
-	cd $cdir; rm -rf git-2.1.0
+	cd $cdir; rm -rf git-2.33.8
 
 # CTAGS
 
@@ -277,7 +314,7 @@ cd $cdir
 	tar -xf autoconf-2.69.tar.xz
 	cd autoconf-2.69
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf autoconf-2.69
 
@@ -288,7 +325,7 @@ cd $cdir
 	tar -xf automake-1.15.tar.xz
 	cd automake-1.15
 	./configure --prefix=/usr --docdir=/usr/share/doc/automake-1.15
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf automake-1.15
 
@@ -371,7 +408,7 @@ echo
 	startStep gdb-7.8.2
 	tar -xzf gdb-7.8.2.tar.gz; cd gdb-7.8.2
 	./configure --prefix=/usr --with-system-readline
-	make
+	make $MAKEJOBS
 	make install
 	cd ..; rm -rf gdb-7.8.2
 
@@ -384,7 +421,7 @@ echo
 	tar -xf elfutils-0.165.tar.bz2
 	cd elfutils-0.165
 	./configure --prefix=/usr --disable-debuginfod
-	make
+	make $MAKEJOBS
 	make -C libelf install
 	install -vm644 config/libelf.pc /usr/lib/pkgconfig
 	rm /usr/lib/libelf.a
@@ -403,7 +440,7 @@ echo
 
 	tar -xzf cmake-3.19.6.tar.gz; cd cmake-3.19.6
 	./configure --prefix=/opt/cmake3  --mandir=/share/man --docdir=/share/doc/cmake-3.19.6
-	make
+	make $MAKEJOBS
 	make install
 
 	# Updating /etc/man_db.conf
@@ -435,7 +472,7 @@ echo
 	./configure --prefix=/opt/python3
 		# May should put Python and Perl in /opt.
 		# So be clear it's not part of production release
-	make
+	make $MAKEJOBS
 	make install
 
 	# Links for usual #!/usr/bin/perl shebang, Abud
@@ -497,7 +534,7 @@ echo
 		-DLLVM_LINK_LLVM_DYLIB=on \
 		-DCMAKE_BUILD_TYPE=Release \
 		../llvm
-	make
+	make $MAKEJOBS
 	make install
 	cd ..
 

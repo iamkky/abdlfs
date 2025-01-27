@@ -54,21 +54,26 @@ export LANGUAGE=C
 cd $EXTRAS
 
 # OpenSSL-1.0.1u
+# Upgraded
+# OpenSSL-1.1.1w (2025-01-25)
+# From https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz
 
-	startStep openssl-1.0.1u
-	tar -xzf openssl-1.0.1u.tar.gz ; cd openssl-1.0.1u
+	startStep OpenSSL-1.1.1w
+	tar -xzf openssl-1.1.1w.tar.gz ; cd openssl-1.1.1w
 
-	./config --openssldir=/etc/ssl --prefix=/usr shared
+	export PERL5LIB=/tools/tmpperl/lib/5.10.0/x86_64-linux
+	./config --openssldir=/etc/ssl --prefix=/usr shared zlib-dynamic
 	make MANDIR=/usr/share/man
 
-	make MANDIR=/usr/share/man install 
-	cp -v -r certs /etc/ssl 
+	# Does not install docs
+	# Because docs installation requires pod2html
+	make MANDIR=/usr/share/man install_sw install_ssldirs
 	
 	# Abud - no docs
 	# install -v -d -m755 /usr/share/doc/openssl-0.9.8g 
 	# cp -v -r doc/{HOWTO,README,*.{txt,html,gif}}  /usr/share/doc/openssl-0.9.8g
 
-	cd $EXTRAS; rm -rf openssl-1.0.1u 
+	cd $EXTRAS; rm -rf openssl-1.1.1w
 
 
 # Berkeley Yacc
@@ -115,17 +120,31 @@ cd $EXTRAS
 	cd $EXTRAS; rm -rf libpcap-1.7.4
 
 # ntp-4.2.4p0
+# Upgraded to 
+# ntp-4.2.8p15 (2025-01-25)
+# From https://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2/ntp-4.2.8p15.tar.gz
 
-	startStep ntp-4.2.4p0
-	tar -xzf ntp-4.2.4p0.tar.gz; cd ntp-4.2.4p0
-	patch -p1 < ../ntp-4.2.4p0-abud.patch
-	./configure --prefix=/usr --sysconfdir=/etc --with-binsubdir=sbin
-	make
+	startStep Ntp-4.2.8p15
+	tar -xf ntp-4.2.8p15.tar.gz; cd ntp-4.2.8p15
+
+	#From: Linux from Stratch 11.0
+	groupadd -g 87 ntp
+	useradd -c "Network Time Protocol" -d /var/lib/ntp -u 87 -g ntp -s /bin/false ntp
+	
+	sed -e 's/"(\\S+)"/"?([^\\s"]+)"?/' -i scripts/update-leap/update-leap.in
+
+	sed -e 's/#ifndef __sun/#if !defined(__sun) \&\& !defined(__GLIBC__)/' -i libntp/work_thread.c
+
+	./configure \
+	    --prefix=/usr			\
+            --bindir=/usr/sbin			\
+            --sysconfdir=/etc			\
+            --enable-linuxcaps			\
+            --with-lineeditlibs=readline	\
+            --docdir=/usr/share/doc/ntp-4.2.8p1
+
 	make install
-
-	# Abud - no docs
-	# install -v -m755 -d /usr/share/doc/ntp-4.2.4p0 &&
-	#cp -v -R html/* /usr/share/doc/ntp-4.2.4p0/
+	install -v -o ntp -g ntp -d /var/lib/ntp
 
 	cat > /etc/ntp.conf << "EOF"
 # Africa
@@ -140,6 +159,7 @@ server 0.europe.pool.ntp.org
 server 0.north-america.pool.ntp.org
 # South America
 server 2.south-america.pool.ntp.org
+
 driftfile /var/cache/ntp.drift
 pidfile /var/run/ntpd.pid
 EOF
@@ -147,7 +167,7 @@ EOF
 	ln -v -sf ../init.d/setclock /etc/rc.d/rc0.d/K46setclock &&
 	ln -v -sf ../init.d/setclock /etc/rc.d/rc6.d/K46setclock
 
-	cd $EXTRAS; rm -rf ntp-4.2.4p0
+	cd $EXTRAS; rm -rf ntp-4.2.8p15
 
 
 # blfs-bootscripts-20080816.tar.bz2
@@ -255,51 +275,42 @@ EOF
 	cd $EXTRAS; rm -rf rsync-3.0.2
 
 # openssh-7.3p1 
+# Upgraded to
+# openssh-8.7p1.tar.gz (2025-01-25, cause openssl)
+# From https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-8.7p1.tar.gz
 
-	startStep openssh-7.3p1
-	tar -xzf openssh-7.3p1.tar.gz ; cd openssh-7.3p1
+	startStep openssh-8.7p1.tar.gz
+	tar -xzf openssh-8.7p1.tar.gz
+	cd openssh-8.7p1
 	
 	install -v -m700 -d /var/lib/sshd &&
 	chown -v root:sys /var/lib/sshd &&
 	groupadd -g 50 sshd &&
 	useradd -c 'sshd PrivSep' -d /var/lib/sshd -g sshd -s /bin/false -u 50 sshd
 
-	sed -i 's@-lcrypto@/usr/lib/libcrypto.a -ldl@' configure
-
-	sed -i 's@ -ldes@@' configure &&
-	./configure --prefix=/usr --sysconfdir=/etc/ssh --datadir=/usr/share/sshd \
-		--libexecdir=/usr/lib/openssh --with-md5-passwords \
-		--with-privsep-path=/var/lib/sshd \
-		--with-xauth=/usr/bin/xauth
+	./configure --prefix=/usr \
+            --sysconfdir=/etc/ssh                    \
+            --with-md5-passwords                     \
+            --with-privsep-path=/var/lib/sshd        \
+            --with-default-path=/usr/bin             \
+            --with-superuser-path=/usr/sbin:/usr/bin \
+            --with-pid-dir=/run
 
 	make
 
-	# Abud - need visual check
-	#	if test -f /usr/bin/scp
-	#	then
-	#		mv /usr/bin/scp /usr/bin/scp-bak
-	#	fi &&
-	#	cp scp /usr/bin/scp &&
-	#	make tests 2>&1 | tee check.log
-	#	grep "FATAL" check.log
-	#
-	#	rm /usr/bin/scp &&
-	#	if test -f /usr/bin/scp-bak
-	#	then
-	#		rm /usr/bin/scp-bak
-	#	fi &&
+	# Abud - install manuals ok, docs no
+	make install &&
+	install -v -m755    contrib/ssh-copy-id /usr/bin &&
+	install -v -m644    contrib/ssh-copy-id.1 /usr/share/man/man1
 
-	make install
-
-	# Abud - no docs
-	#	install -v -m755 -d /usr/share/doc/openssh-4.7p1 &&
-	#	install -v -m644 INSTALL LICENCE OVERVIEW README* WARNING.RNG \
-	#	/usr/share/doc/openssh-4.7p1
+	# Abud - docs no
+	# install -v -m755 -d /usr/share/doc/openssh-8.7p1
+	# install -v -m644    INSTALL LICENCE OVERVIEW README* /usr/share/doc/openssh-8.7p1
 
 	# Abud - fixme
-	# 	echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+	# echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 
-	cd $EXTRAS; rm -rf openssh-7.3p1
+	cd $EXTRAS; rm -rf openssh-8.7p1
 
 # popt-1.15
 
@@ -352,7 +363,7 @@ EOF
 	startStep screen-4.0.3
 	tar -xzf screen-4.0.3.tar.gz; cd screen-4.0.3
 	./configure --prefix=/usr --with-sys-screenrc=/etc/screenrc
-	make
+	make $MAKEJOBS
 	make install
 cat <<EOF > /etc/screenrc
 startup_message off
@@ -427,7 +438,7 @@ EOF
 	startStep strace-4.9
 	tar -xJf strace-4.9.tar.xz; cd strace-4.9
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf strace-4.9
 
@@ -445,7 +456,7 @@ EOF
 	startStep lrzsz-0.12.20
 	tar -xzf lrzsz-0.12.20.tar.gz; cd lrzsz-0.12.20
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	ln -s lsz /usr/bin/sz
 	ln -s lrz /usr/bin/rz
@@ -528,7 +539,7 @@ EOF
 	startStep wget-1.21
 	tar -xzf wget-1.21.tar.gz; cd wget-1.21
 	./configure --prefix=/usr --sysconfdir=/etc --disable-nls --disable-iri
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf wget-1.21
 
@@ -582,36 +593,67 @@ EOF
 	cd $EXTRAS; rm -rf netcat-0.7.1
 
 # Added
+# libuv-v1.42.0 (2025-01-25, cause bind-9.16.20)
+# From https://dist.libuv.org/dist/v1.42.0/libuv-v1.42.0.tar.gz
+
+	startStep libuv-v1.42.0
+	tar -xf libuv-v1.42.0.tar.gz
+	cd libuv-v1.42.0
+
+	# No Autogen in system yet.
+	# This patch provides files that would be generated by autogen.sh
+	touch configure.ac
+	patch -p1 -d . < ../libuv-v1.42.0-no-autogen.patch
+	chmod a+x ar-lib compile config.guess config.sub configure depcomp install-sh ltmain.sh missing
+	./configure --prefix=/usr --disable-static
+	sleep 10	# Out of Abud stupid mind, configure time should be enough. But...
+	touch aclocal.m4 Makefile.in configure
+
+	make
+	make install
+	cd $EXTRAS; rm -rf libuv-v1.42.0
+
+
+# Added
 # bind-9.10.0-P2
+# Upgraded to 
+# bind-9.16.20 (2025-01-25, cause openssl)
+# From ftp://ftp.isc.org/isc/bind9/9.16.20/bind-9.16.20.tar.xz
 
-	startStep bind-9.10.0-P2
-	tar -xf bind-9.10.0-P2.tar.gz
-	cd bind-9.10.0-P2
+	startStep bind-9.16.20
+	tar -xf bind-9.16.20.tar.xz
+	cd bind-9.16.20
 
-	./configure --prefix=/usr 
+	./configure \
+	    --prefix=/usr           \
+            --sysconfdir=/etc       \
+            --localstatedir=/var    \
+            --mandir=/usr/share/man \
+            --with-libtool          \
+            --disable-static        \
+	    --without-python	
 
-	make -C lib/dns
-	make -C lib/isc
-	make -C lib/bind9
-	make -C lib/isccfg
-	make -C lib/lwres
-	make -C bin/dig
+	make 
 
+	make -C lib install
 	make -C bin/dig install
 
-	cd $EXTRAS; rm -rf bind-9.10.0-P2
+	cd $EXTRAS; rm -rf bind-9.16.20
 
 # Added
 # fio-2.21
 # From https://git.kernel.org/pub/scm/linux/kernel/git/axboe/fio.git/snapshot/fio-2.21.tar.gz
+# Upgraded to
+# fio-3.38 (2025-01-26, cause new kernel)
+# From https://brick.kernel.dk/snaps/fio-3.38.tar.gz
 
-	startStep fio-2.21
-	tar -xf fio-2.21.tar.gz
-	cd fio-2.21
+	startStep fio-3.38
+	tar -xf fio-3.38.tar.gz
+	cd fio-3.38
 	./configure --prefix=/usr
 	make
 	make install
-	cd $EXTRAS; rm -rf fio-2.21
+	cd $EXTRAS; rm -rf fio-3.38
 
 # Added
 # iputils-s20121221
@@ -635,7 +677,7 @@ EOF
 	mv Makefile.in Makefile.in.orig
 	sed -e 's/SUBDIRS = doc extras man po lib src/SUBDIRS = doc extras man lib src/' Makefile.in.orig > Makefile.in
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf minicom-2.8
 
@@ -691,16 +733,16 @@ EOF
 # Added
 # qemu-4.2.0
 
-	startStep Python-2.7.15-temporary-for-qemu
+	startStep Python-2.7.15-for-qemu
 	tar -xf Python-2.7.15.tar.xz
 	cd Python-2.7.15
 	./configure --prefix=/tools/tmppython2
-	make
+	make $MAKEJOBS
 	make install
 	cd ..
 	rm -rf Python-2.7.15
 
-	startStep glib-2.56.1.tar.xz
+	startStep glib-2.56.1.tar.xz-for-qemu
 	tar -xf glib-2.56.1.tar.xz
 	cd glib-2.56.1
 	# Avoiding locales
@@ -710,7 +752,7 @@ EOF
 	SAVEDPATH=$PATH
 	export PATH=$PATH:/tools/bin
 	./configure --prefix=/usr --disable-libmount --with-pcre=internal --with-python=/tools/tmppython2/bin/python --disable-selinux --enable-gtk-doc-html=no --enable-gtk-doc=no
-	make
+	make $MAKEJOBS
 	make install
 	export PATH=$SAVEDPATH
 	cd ..
@@ -743,7 +785,7 @@ EOF
 		--disable-sheepdog \
 		--enable-trace-backend=nop
 	sed -ie 's/TOOLS=qemu-ga.*/TOOLS=qemu-ga$(EXESUF) qemu-img$(EXESUF) fsdev\/virtfs-proxy-helper$(EXESUF)/' config-host.mak
-	make
+	make $MAKEJOBS
 	make install
 
 	QS=/usr/share/qemu
