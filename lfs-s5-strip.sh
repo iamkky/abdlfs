@@ -63,9 +63,7 @@ rm -rf $LFS/sources
 rm -rf $LFS/extensions
 
 # Removing scripts
-rm -rf $LFS/lfs-s2.sh
-rm -rf $LFS/lfs-s3-ext.sh
-rm -rf $LFS/lfs-s4.sh
+rm -rf $LFS/lfs-*.sh
 
 # Removing docs and gcc and opt
 if [ "$dev" = no ]

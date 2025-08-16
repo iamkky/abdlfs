@@ -209,7 +209,7 @@ cd $cdir
 	tar -xzf tcl8.5.7-src.tar.gz
 	cd tcl8.5.7
 	cd unix
-	./configure --prefix=/ust
+	./configure --prefix=/usr
 	make
 	make install
 	make install-private-headers

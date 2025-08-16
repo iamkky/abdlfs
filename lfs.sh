@@ -12,6 +12,11 @@ export KERNEL_VERSION="linux-5.19.9"
 
 #BUILD_CROSS_TOOLS="yes"
 
+if [ "$MAKEJOBS" = "" ]
+then
+        MAKEJOBS="-j 4"
+fi
+
 error_trap() {
 	echo -e "\nERROR: Error trapped!\n"
 	exit -1
