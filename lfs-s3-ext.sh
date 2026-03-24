@@ -177,7 +177,7 @@ EOF
 	#	make install-ntp
 	make install-fcron
 	#	make install-service-dhcpcd
-	make install-sshd
+	make install-d
 	cd $EXTRAS; rm -rf blfs-bootscripts-20080816
 
 # Adjusting boot scripts
@@ -294,7 +294,7 @@ EOF
             --with-privsep-path=/var/lib/sshd        \
             --with-default-path=/usr/bin             \
             --with-superuser-path=/usr/sbin:/usr/bin \
-            --with-pid-dir=/run
+            --with-pid-dir=/var/run
 
 	make
 
