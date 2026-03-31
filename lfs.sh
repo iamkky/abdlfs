@@ -28,7 +28,7 @@ LFSSCRIPTNAME=${BASH_SOURCE[0]}
 
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
 
-buildver=2.1.0
+buildver=2.1.1
 buildtag=`date +%Y%m%d-%H%M%S`
 cdir=`pwd`
 
