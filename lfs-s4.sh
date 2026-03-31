@@ -247,16 +247,16 @@ cd $cdir
 	make install
 	cd $cdir; rm -rf ctags-5.8
 
-# QEMU
-# ??? why ???, abud
-
-	startStep qemu-0.14.1
-	#http://download.savannah.gnu.org/releases/qemu/qemu-0.14.1.tar.gz
-	tar -xzf qemu-0.14.1.tar.gz ; cd qemu-0.14.1
-	./configure --prefix=/usr --disable-curl
-	make qemu-img
-	cp qemu-img /usr/bin/.
-	cd $cdir; rm -rf qemu-0.14.1
+## QEMU
+## ??? why ???, abud
+#
+#	startStep qemu-0.14.1
+#	#http://download.savannah.gnu.org/releases/qemu/qemu-0.14.1.tar.gz
+#	tar -xzf qemu-0.14.1.tar.gz ; cd qemu-0.14.1
+#	./configure --prefix=/usr --disable-curl
+#	make qemu-img
+#	cp qemu-img /usr/bin/.
+#	cd $cdir; rm -rf qemu-0.14.1
 
 # libxslt
 
@@ -579,9 +579,9 @@ echo
 
 # SSHD-PermitRootLogin
 
-	startStep SSHD-PermitRootLogin
+	#startStep SSHD-PermitRootLogin
 	# Enable root login via ssh
-	sed -i '1,$s/#PermitRootLogin.*prohibit-password/PermitRootLogin yes/'   /etc/ssh/sshd_config
+	#sed -i '1,$s/#PermitRootLogin.*prohibit-password/PermitRootLogin yes/'   /etc/ssh/sshd_config
 
 
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Finished $LFSSCRIPTNAME"; echo

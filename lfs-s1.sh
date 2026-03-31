@@ -242,7 +242,9 @@ echo
 		     -Dlibpth="/usr/lib"
 	make $MAKEJOBS
 	make install
-	export PERL5LIB=/tools/tmpperl/lib/5.10.0/x86_64-linux
+	archname=`$LFS/tools/tmpperl/bin/perl -MConfig -e 'print $Config{archname}'`
+	export PERL5LIB="$LFS/tools/tmpperl/lib/5.10.0/$archname"
+	#export PERL5LIB=/tools/tmpperl/lib/5.10.0/i686-linux
 	cd ..; rm -rf perl-5.10.0
 
 # 5.6. Linux 2.6.30.2 Api Headers

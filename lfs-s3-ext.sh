@@ -61,7 +61,9 @@ cd $EXTRAS
 	startStep OpenSSL-1.1.1w
 	tar -xzf openssl-1.1.1w.tar.gz ; cd openssl-1.1.1w
 
-	export PERL5LIB=/tools/tmpperl/lib/5.10.0/x86_64-linux
+        archname=`$LFS/tools/tmpperl/bin/perl -MConfig -e 'print $Config{archname}'`
+        export PERL5LIB="$LFS/tools/tmpperl/lib/5.10.0/$archname:$LFS/tools/tmpperl/lib/5.10.0"
+	#export PERL5LIB=/tools/tmpperl/lib/5.10.0/i686-linux
 	./config --openssldir=/etc/ssl --prefix=/usr shared zlib-dynamic
 	make MANDIR=/usr/share/man
 
@@ -94,6 +96,17 @@ cd $EXTRAS
 	make
 	make install
 	cd $EXTRAS; rm -rf expat-2.2.10
+
+# Added 20260327
+# Libssh2-1.11.1.tar.gz
+
+	startStep libssh2-1.11.1
+	tar -xzf libssh2-1.11.1.tar.gz; cd libssh2-1.11.1
+	./configure 	--prefix=/usr 			\
+			--disable-examples-build
+	make
+	make install
+	cd $EXTRAS; rm -rf libssh2-1.11.1
 
 # Curl
 
@@ -177,7 +190,7 @@ EOF
 	#	make install-ntp
 	make install-fcron
 	#	make install-service-dhcpcd
-	make install-d
+	make install-sshd
 	cd $EXTRAS; rm -rf blfs-bootscripts-20080816
 
 # Adjusting boot scripts
@@ -418,7 +431,7 @@ EOF
 
 	startStep openvpn-2.4.6
 	tar -xzf openvpn-2.4.6.tar.gz; cd openvpn-2.4.6
-	./configure --enable-iproute2 --disable-lzo --disable-plugin-auth-pam
+	./configure --prefix=/usr --enable-iproute2 --disable-lzo --disable-plugin-auth-pam
 	make
 	make install
 	cd $EXTRAS; rm -rf openvpn-2.4.6
@@ -468,6 +481,7 @@ EOF
 	startStep lm-sensors-3-5-0
 	tar -xzf lm-sensors-3-5-0.tar.gz; cd lm-sensors-3-5-0
 	sed -i -e "s/! which/! whereis/" Makefile
+	sed -i -e "sX/usr/localX/usrX" Makefile
 	make
 	make install
 	cd $EXTRAS; rm -rf lm-sensors-3-5-0
@@ -529,7 +543,7 @@ EOF
 	./configure --prefix=/usr --without-p11-kit
 	make
 	make install
-	cd $EXTRAS; rm -rf wget-1.12
+	cd $EXTRAS; rm -rf gnutls-3.4.5
 
 # Added
 # Wget-1.12
@@ -568,7 +582,7 @@ EOF
 	make
 	make install
 #	make PREFIX=$SRCDIR/$1/usr/local install
-	cd $EXTRAS; rm -rf pciutils-3.2.1
+	cd $EXTRAS; rm -rf pciutils-3.1.4
 
 # Added
 # Smartmontools-6.3
@@ -704,7 +718,7 @@ EOF
 	./configure --prefix=/usr/bin
 	make
 	make install
-	cd $EXTRAS; rm -rf netperf-2.7.0
+	cd $EXTRAS; rm -rf netperf-netperf-2.7.0
 
 # Added
 # iperf3-3.1.3
@@ -801,6 +815,19 @@ EOF
 	cd ..
 	cd ..
 	rm -rf qemu-4.2.0
+
+# Added 20260329
+# jq-1.8.1
+# from https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-1.8.1.tar.gz
+
+	startStep jq-1.8.1
+	tar -xf jq-1.8.1.tar.gz
+	cd jq-1.8.1
+	./configure --prefix=/usr
+	make
+	make install
+	cd ..
+	rm -rf jq-1.8.1
 
 # Added
 # libcaca-0.99.beta19

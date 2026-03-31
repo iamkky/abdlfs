@@ -49,3 +49,5 @@ expat-2.2.10.tar.bz2
 gnutls-3.4.5.tar.xz
 nettle-3.1.1.tar.gz
 libtasn1-4.3.tar.gz
+libssh2-1.11.1.tar.gz
+jq-1.8.1.tar.gz
