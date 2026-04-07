@@ -16,7 +16,7 @@ man-db-2.5.5-fix_testsuite-1.patch
 nmap-4.11.tgz
 nmap-7.40.tar.bz2
 openssl-1.1.1w.tar.gz
-openssh-8.7p1.tar.gz
+openssh-10.0p2.tar.gz
 lsof_4.88.tar.bz2
 quagga-0.99.24.1.tar.gz
 openvpn-2.4.6.tar.gz

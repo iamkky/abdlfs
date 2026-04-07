@@ -291,10 +291,14 @@ EOF
 # Upgraded to
 # openssh-8.7p1.tar.gz (2025-01-25, cause openssl)
 # From https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-8.7p1.tar.gz
+# Upgraded to
+# openssh-10.0p2.tar.gz (06-Apr-2026)
+# From https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.0p2.tar.gz
 
-	startStep openssh-8.7p1.tar.gz
-	tar -xzf openssh-8.7p1.tar.gz
-	cd openssh-8.7p1
+
+	startStep openssh-10.0p2.tar.gz
+	tar -xzf openssh-10.0p2.tar.gz
+	cd openssh-10.0p1    # Really ???
 	
 	install -v -m700 -d /var/lib/sshd &&
 	chown -v root:sys /var/lib/sshd &&
@@ -323,7 +327,7 @@ EOF
 	# Abud - fixme
 	# echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 
-	cd $EXTRAS; rm -rf openssh-8.7p1
+	cd $EXTRAS; rm -rf openssh-10.0p1
 
 # popt-1.15
 
