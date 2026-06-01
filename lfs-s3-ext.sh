@@ -309,8 +309,8 @@ EOF
             --sysconfdir=/etc/ssh                    \
             --with-md5-passwords                     \
             --with-privsep-path=/var/lib/sshd        \
-            --with-default-path=/usr/bin             \
-            --with-superuser-path=/usr/sbin:/usr/bin \
+            --with-default-path=/bin:/usr/bin        \
+            --with-superuser-path=/bin:/sbin:/usr/sbin:/usr/bin \
             --with-pid-dir=/var/run
 
 	make
