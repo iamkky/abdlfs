@@ -1,9 +1,11 @@
 #!/bin/sh
 
-#	http://ftp.gnu.org/gnu/cpio/cpio-2.11.tar.gz
+set +h
+LFSSCRIPTNAME=${BASH_SOURCE[0]}
+echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
 
-# Relevant note:
-#
+SYSTEM_ARCH=$(uname -m)
+
 # Most large packages like Perl, Python, CMake, llvm and alike should no go into
 # specific dir at /opt.
 #
@@ -12,12 +14,6 @@
 # Examples:
 # Perl5 -> /opt/perl5
 # Python3 -> /opt/python3
-
-set +h
-LFSSCRIPTNAME=${BASH_SOURCE[0]}
-SYSTEM_ARCH=$(uname -m)
-
-echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
 
 startStep() {
 	LFSSTEP=$1
@@ -566,7 +562,7 @@ echo
 
 echo
 echo "#########################################################################"
-echo "########################    FINAL MINOR ADJUST ##########################"
+echo "########################  FINAL MINOR ADJUSTS  ##########################"
 echo
 
 #####################

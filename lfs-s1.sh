@@ -1,14 +1,10 @@
 #!/bin/sh
 
-# LFS 6.5rc2
-# LFS 7.6
-# LFS 7.8
-
 set +h
-umask 022
 LFSSCRIPTNAME=${BASH_SOURCE[0]}
-
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
+
+umask 022
 
 CURDIR=`pwd`
 LC_ALL=POSIX

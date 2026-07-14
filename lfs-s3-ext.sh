@@ -1,28 +1,5 @@
 #!/bin/sh
 
-#http://rt.openssl.org/Ticket/Display.html?id=1148&user=guest&pass=guest
-
-#	wget http://invisible-island.net/datafiles/release/byacc.tar.gz
-#	wget http://curl.haxx.se/download/archeology/curl-7.12.0.tar.gz
-#	wget http://www.tcpdump.org/release/libpcap-1.0.0.tar.gz
-#	wget http://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2/ntp-4.2.4p0.tar.gz
-#	wget http://www.linuxfromscratch.org/blfs/downloads/6.3/blfs-bootscripts-20080816.tar.bz2
-#	wget http://fcron.free.fr/archives/fcron-3.0.3.src.tar.gz
-#	wget https://fedorahosted.org/releases/c/r/cronie/cronie-1.4.4.tar.gz
-#	wget http://download.berlios.de/dhcpcd/dhcpcd-3.0.19.tar.bz2
-#	wget http://anduin.linuxfromscratch.org/sources/BLFS/6.3/r/rsync-3.0.2.tar.gz
-#	wget http://mirrors.unb.br/pub/OpenBSD/OpenSSH/portable/openssh-7.3p1.tar.gz
-#	wget http://rpm5.org/files/popt/popt-1.15.tar.gz
-#	wget http://downloads.sourceforge.net/hdparm/hdparm-7.7.tar.gz
-#	wget http://www.tcpdump.org/release/tcpdump-4.0.0.tar.gz
-#	wget http://ftp.gnu.org/gnu/screen/screen-4.0.3.tar.gz
-#	wget http://nmap.org/dist-old/nmap-4.11.tgz
-#	wget https://nmap.org/dist/nmap-7.40.tar.bz2
-#	wget https://www.openssl.org/source/openssl-1.0.1u.tar.gz
-
-#	logrotate-3.7.1.tar.gz collected from redhat srpm ! ! !
-
-
 set +h
 LFSSCRIPTNAME=${BASH_SOURCE[0]}
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
@@ -294,11 +271,14 @@ EOF
 # Upgraded to
 # openssh-10.0p2.tar.gz (06-Apr-2026)
 # From https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.0p2.tar.gz
+# Upgraded to
+# openssh-10.3p1.tar.gz (12-Jul-2026)
+# From https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.3p1.tar.gz
 
 
-	startStep openssh-10.0p2.tar.gz
-	tar -xzf openssh-10.0p2.tar.gz
-	cd openssh-10.0p1    # Really ???
+	startStep openssh-10.3p1.tar.gz
+	tar -xzf openssh-10.3p1.tar.gz
+	cd openssh-10.3p1
 	
 	install -v -m700 -d /var/lib/sshd &&
 	chown -v root:sys /var/lib/sshd &&
@@ -307,7 +287,6 @@ EOF
 
 	./configure --prefix=/usr \
             --sysconfdir=/etc/ssh                    \
-            --with-md5-passwords                     \
             --with-privsep-path=/var/lib/sshd        \
             --with-default-path=/bin:/usr/bin        \
             --with-superuser-path=/bin:/sbin:/usr/sbin:/usr/bin \
@@ -327,7 +306,7 @@ EOF
 	# Abud - fixme
 	# echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 
-	cd $EXTRAS; rm -rf openssh-10.0p1
+	cd $EXTRAS; rm -rf openssh-10.3p1
 
 # popt-1.15
 
@@ -436,6 +415,8 @@ EOF
 	startStep openvpn-2.4.6
 	tar -xzf openvpn-2.4.6.tar.gz; cd openvpn-2.4.6
 	./configure --prefix=/usr --enable-iproute2 --disable-lzo --disable-plugin-auth-pam
+	# --with-openvpn-plugin-dir=/usr/lib/openvpn/plugins
+	# --libdir=/usr/lib
 	make
 	make install
 	cd $EXTRAS; rm -rf openvpn-2.4.6
@@ -846,6 +827,40 @@ EOF
 	rm -fv /usr/bin/cacademo /usr/bin/cacaserver
 	cd ..
 	rm -rf libcaca-0.99.beta19
+
+
+# Added 2026-07-13
+# libevent-2.1.13-stable.tar.gz
+# from https://github.com/libevent/libevent/releases/download/release-2.1.13-stable/libevent-2.1.13-stable.tar.gz
+
+
+	# Required by tmux
+	startStep libevent-2.1.13-stable
+	tar -xf libevent-2.1.13-stable.tar.gz
+	cd libevent-2.1.13-stable
+	./configure --prefix=/usr
+	make
+	make install
+	cd ..
+	rm -rf libevent-2.1.13-stable
+
+
+# Added 2026-07-13
+# tmux-3.7b.tar.gz
+# from https://github.com/tmux/tmux/releases/download/3.7b/tmux-3.7b.tar.gz
+
+	startStep tmux-3.7b
+	tar -xf tmux-3.7b.tar.gz
+	cd tmux-3.7b
+	./configure --prefix=/usr
+	make
+	make install
+	cd ..
+	rm -rf tmux-3.7b
+
+
+############################################################################################
+########## End of Packages Compilations
 
 #
 # devsetup

@@ -1,10 +1,10 @@
 #!/bin/sh
 
-#Main system creation script
-
 set +h
 LFSSCRIPTNAME=${BASH_SOURCE[0]}
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
+
+#Main system creation script
 
 startStep() {
 	LFSSTEP=$1

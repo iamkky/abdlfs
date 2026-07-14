@@ -1,5 +1,6 @@
 #!/bin/sh
 
+set +h
 LFSSCRIPTNAME=${BASH_SOURCE[0]}
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
 

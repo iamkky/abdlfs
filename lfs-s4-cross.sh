@@ -2,9 +2,9 @@
 
 set +h
 LFSSCRIPTNAME=${BASH_SOURCE[0]}
-SYSTEM_ARCH=$(uname -m)
-
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
+
+SYSTEM_ARCH=$(uname -m)
 
 startStep() {
 	LFSSTEP=$1

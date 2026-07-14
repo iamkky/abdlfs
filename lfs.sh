@@ -19,6 +19,13 @@ fi
 
 error_trap() {
 	echo -e "\nERROR: Error trapped!\n"
+	if [ "$LFS" != "" ]
+	then
+		umount $LFS/dev/pts
+		umount $LFS/dev/shm
+		umount $LFS/proc
+		umount $LFS/sys
+	fi
 	exit -1
 }
 
@@ -169,6 +176,12 @@ fi
 rm -rvf "$LFS"/AbdLFSRemoved
 cd $cdir
 
+### Cpioing dev before squash
+echo; echo "AbdLFS: Cpioing dev before squash"; echo
+cd $LFSBASE/dev
+ln -s ../init.d/devmount etc/rc.d/rc3.d/S20devmount
+find . | cpio -o -H newc | gzip > $cdir/abd-lfs-"$buildver-$buildtag".$KARCH-dev-full-nosquash.cpio.gz
+cd $cdir
 
 ### squashing opt/* (dev only)
 echo; echo 'AbdLFS: Executing lfs-s6-opt-squash-opt.sh';echo
