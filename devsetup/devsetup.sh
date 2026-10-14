@@ -43,7 +43,9 @@ checkIp $NS
 
 echo "Setting up networking with ip:$ip, gateway:$GW, dns:$NS "
 
-cat << NETWORK_EOF > $STORAGE/startup.sh
+mkdir -pv $STORAGE/devmount
+
+cat << NETWORK_EOF > $STORAGE/devmount/startup.sh
 #!/bin/bash
 # Created by setup_storage.sh
 
@@ -54,13 +56,14 @@ echo "Using: \$NETDEV, ip:$ip, gw:$GW, dns:$NS"
 ip addr add $ip dev \$NETDEV
 ip link set \$NETDEV up
 ip route add default via $GW
+
 echo "nameserver $NS" > /etc/resolv.conf
 NETWORK_EOF
 
-chmod a+x $STORAGE/startup.sh
+chmod a+x $STORAGE/devmount/startup.sh
 
-cp /etc/passwd $STORAGE/
-cp /etc/group  $STORAGE/
-cp /etc/shadow $STORAGE/
+cp /etc/passwd $STORAGE/devmount/
+cp /etc/group  $STORAGE/devmount/
+cp /etc/shadow $STORAGE/devmount/
 
 echo "Done"

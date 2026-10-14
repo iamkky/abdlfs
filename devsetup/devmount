@@ -20,21 +20,28 @@ function msg()
 function process()
 {
 	DIR=$1
-	if [ -e $DIR/passwd ] ; then
-		msg "Found $DIR/passwd"
+
+	if [ -d $DIR/devmount ]; then
+		DVDIR=$DIR/devmount
+	else
+		DVDIR=$DIR
+	fi
+
+	if [ -e $DVDIR/passwd ] ; then
+		msg "Found $DVDIR/passwd"
 		msg "Overwriting system passwd, shadow and group"
-		cp $DIR/passwd /etc/passwd
-		cp $DIR/shadow /etc/shadow
-		cp $DIR/group /etc/group
+		cp $DVDIR/passwd /etc/passwd
+		cp $DVDIR/shadow /etc/shadow
+		cp $DVDIR/group /etc/group
 		chmod 644 /etc/passwd
 		chmod 400 /etc/shadow
 		chmod 644 /etc/group
 	fi
 
-	if [ -x $DIR/startup.sh ] ; then
-		msg "Found executable $DIR/startup.sh"
-		$DIR/startup.sh
-		msg "Exec of $DIR/startup.sh finished"
+	if [ -x $DVDIR/startup.sh ] ; then
+		msg "Found executable $DVDIR/startup.sh"
+		$DVDIR/startup.sh
+		msg "Exec of $DVDIR/startup.sh finished"
 	fi
 
 	if [ -d $DIR/AbdLFSExtras ] ; then
