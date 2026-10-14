@@ -203,7 +203,6 @@ find . | cpio -o -H newc | gzip > $cdir/abd-lfs-"$buildver-$buildtag".$KARCH-pre
 
 echo; echo "AbdLFS: Cpioing dev"; echo
 cd $LFSBASE/dev
-ln -s ../init.d/devmount etc/rc.d/rc3.d/S20devmount
 find . | cpio -o -H newc | gzip > $cdir/abd-lfs-"$buildver-$buildtag".$KARCH-dev-full.cpio.gz
 cd $cdir
 

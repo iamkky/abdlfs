@@ -109,7 +109,7 @@ cd $cdir
 		-A "append:ccflags=-Wno-unused-but-set-variable" \
 		-Dpager="/usr/bin/less -isR"
 
-	make
+	make $MAKEJOBS
 	make install
 
 	# Links for usual #!/usr/bin/perl shebang, Abud
@@ -137,7 +137,7 @@ cd $cdir
 	# Abud: glibc warning about gets 
 	sed -i -e '/gets is a/d' gnu/stdio.in.h
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf cpio-2.11
 
@@ -147,38 +147,31 @@ cd $cdir
 
 	tar -xzf apr-1.4.5.tar.gz ; cd apr-1.4.5
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf apr-1.4.5
 
 	tar -xzf apr-util-1.3.12.tar.gz ; cd apr-util-1.3.12
 	./configure --prefix=/usr --with-apr=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf apr-util-1.3.12
 
-	tar -xzf libxml2-sources-2.7.8.tar.gz ; cd libxml2-2.7.8 
-	./configure --prefix=/usr
-	#ignore this error "/bin/rm: cannot remove `libtoolT': No such file or directory"
-	make
-	make install
-	cd $cdir; rm -rf libxml2-2.7.8
-
 	tar -xzf neon-0.29.6.tar.gz ; cd neon-0.29.6
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf neon-0.29.6
 
 	tar -xzf sqlite-autoconf-3070603.tar.gz ; cd sqlite-autoconf-3070603
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf sqlite-autoconf-3070603
 
 	tar -xzf subversion-1.6.16.tar.gz ; cd subversion-1.6.16
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf subversion-1.6.16
 
@@ -206,7 +199,7 @@ cd $cdir
 	cd tcl8.5.7
 	cd unix
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	make install-private-headers
 
@@ -229,7 +222,7 @@ cd $cdir
 	SAVEDPATH=$PATH
 	export PATH=$PATH:/tools/bin
 	./configure --prefix=/usr --with-gitconfig=/etc/gitconfig
-	make
+	make $MAKEJOBS
 	make install
 	export PATH=$SAVEDPATH
 	cd $cdir; rm -rf git-2.33.8
@@ -239,29 +232,28 @@ cd $cdir
 	startStep ctags-5.8
 	tar -xzf ctags-5.8.tar.gz ; cd ctags-5.8
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf ctags-5.8
 
-## QEMU
-## ??? why ???, abud
-#
-#	startStep qemu-0.14.1
-#	#http://download.savannah.gnu.org/releases/qemu/qemu-0.14.1.tar.gz
-#	tar -xzf qemu-0.14.1.tar.gz ; cd qemu-0.14.1
-#	./configure --prefix=/usr --disable-curl
-#	make qemu-img
-#	cp qemu-img /usr/bin/.
-#	cd $cdir; rm -rf qemu-0.14.1
+# libxslt-1.1.20
+# Upgraded to
+# libxslt-1.1.33 (because libxml2-2.9.10)
+# From https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.33.tar.xz
 
-# libxslt
+	startStep libxslt-1.1.33
+	tar -xzf libxslt-1.1.33.tar.gz; cd libxslt-1.1.33
 
-	startStep libxslt-1.1.20
-	tar -xzf libxslt-1.1.20.tar.gz; cd libxslt-1.1.20
-	./configure --prefix=/usr --quiet
-	make
+	# xslt-1.1.20 configure uses wrong syntax for xml2-config
+	# It calls "xml2-config --libs print"
+	# There is not this "print" in usage... 
+        # Doesn't break build for xml2-2.7.8, but breaks for xml2-2.9.14
+	sed -i 's/--libs print/--libs/' configure
+
+	./configure --prefix=/usr --disable-static
+	make $MAKEJOBS
 	make install
-	cd $cdir; rm -rf libxslt-1.1.20
+	cd $cdir; rm -rf libxslt-1.1.33
 
 # 6.37.1 (LFS 7.6) - bc-1.06.95
 
@@ -272,7 +264,7 @@ cd $cdir
 	sed -i -e 's/all-am: Makefile \$(INFO_DEPS) \$(MANS)/all-am: Makefile \$(MANS)/' \
 		-e 's/install-data-am: install-info-am install-man/install-data-am: install-man/' doc/Makefile.in
 	./configure --prefix=/usr --with-readline --mandir=/usr/share/man 
-	make
+	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf bc-1.06.95
 
@@ -282,7 +274,7 @@ cd $cdir
 	startStep valgrind-3.18.1
 	tar -xf valgrind-3.18.1.tar.bz2; cd valgrind-3.18.1
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	find /usr/libexec/valgrind -executable -name '*-linux' -exec strip --strip-all {} \;
 	cd $cdir; rm -rf valgrind-3.18.1
@@ -293,15 +285,6 @@ cd $cdir
 	tar -xzf man-pages-5.10.tar.gz; cd man-pages-5.10
 	make install
 	cd $cdir; rm -rf man-pages-5.10
-
-# docker files
-# Removed
-#
-#	tar -xzf docker-18.06.1-ce.tgz
-#	cd docker
-#	cp * /usr/bin/
-#	cd $cdir; rm -rf docker
-#
 
 # Added
 # autoconf-2.69.tar.xz
@@ -329,7 +312,6 @@ echo
 echo "#########################################################################"
 echo "########################    EXTRA PACKAGES     ##########################"
 echo
-
 
 # Added dev
 # Squashfs-4.4
@@ -368,10 +350,10 @@ echo
 	tar -xzf libcgi-1.0.tar.gz; cd libcgi-1.0
 	if [ "$SYSTEM_ARCH" = "x86_64" ]; then
 		CFLAGS=-fPIC ./configure --prefix=/usr
-		CFLAGS=-fPIC make
+		CFLAGS=-fPIC make $MAKEJOBS
 	else
 		./configure --prefix=/usr
-		make
+		make $MAKEJOBS
 	fi
 	make install
 	cd ..; rm -rf libcgi-1.0
@@ -382,7 +364,7 @@ echo
 	startStep swig-1.3.25
 	tar -xzf swig-1.3.25.tar.gz; cd swig-1.3.25
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd ..; rm -rf swig-1.3.25
 
@@ -392,7 +374,7 @@ echo
 	startStep nasm-2.08rc5	
 	tar -xzf nasm-2.08rc5.tar.gz; cd nasm-2.08rc5
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd ..; rm -rf nasm-2.08rc5
 
@@ -423,6 +405,50 @@ echo
 	rm /usr/lib/libelf.a
 	cd ..; rm -rf elfutils-0.165
 
+# Added dev /opt
+# Python
+
+	cd $cdir
+	startStep Python-3.9.1
+
+	PATH=$PATH:/opt/python3/bin
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python3/lib
+	export PATH LD_LIBRARY_PATH
+
+	tar xzvf Python-3.9.1.tgz; cd Python-3.9.1
+	./configure --prefix=/opt/python3
+	make $MAKEJOBS
+	make install
+
+	# Links for usual #!/usr/bin/perl shebang, Abud
+	ln -s /opt/python3/bin/python3 /usr/bin/python
+	ln -s /opt/python3/bin/python3 /usr/bin/python3
+
+	# Updating /etc/man_db.conf
+	echo "MANDATORY_MANPATH /opt/python3/share/man" >> /etc/man_db.conf
+	echo "MANDB_MAP		/opt/python3/share/man	/var/cache/man" >> /etc/man_db.conf
+
+	# Updating the /etc/profile
+	( echo
+          echo "#included by AbdLFS step Python-3.9.1"
+	  echo "export PATH=\$PATH:/opt/python3/bin"
+	  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/python3/lib"
+	) >> /etc/profile
+
+	cd ..; rm -rf Python-3.9.1
+
+
+	# note:
+	# --enable-optimizations appears to not worth time and risk
+	# -> PGO  is a very complex technic que may yield a 10% speed gain for certain codes.
+	# -> LTO  is a GCC optiomization technic that may worth in the future. But not now.
+	#
+	# Python is not in the critical path of anything in the system... So...
+	#
+	# https://gcc.gnu.org/onlinedocs/gccint/LTO-Overview.html
+	# https://en.wikipedia.org/wiki/Profile-guided_optimization
+	#
+	# Abud
 
 # Added dev /opt
 # Cmake-3.19.6
@@ -453,53 +479,6 @@ echo
 	) >> /etc/profile
 
 	cd ..; rm -rf cmake-3.19.6
-
-# Added dev /opt
-# Python
-
-	cd $cdir
-	startStep Python-3.9.1
-
-	PATH=$PATH:/opt/python3/bin
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python3/lib
-	export PATH LD_LIBRARY_PATH
-
-	tar xzvf Python-3.9.1.tgz; cd Python-3.9.1
-	./configure --prefix=/opt/python3
-		# May should put Python and Perl in /opt.
-		# So be clear it's not part of production release
-	make $MAKEJOBS
-	make install
-
-	# Links for usual #!/usr/bin/perl shebang, Abud
-	ln -s /opt/python3/bin/python3 /usr/bin/python
-	ln -s /opt/python3/bin/python3 /usr/bin/python3
-
-	# Updating /etc/man_db.conf
-	echo "MANDATORY_MANPATH                       /opt/python3/share/man" >> /etc/man_db.conf
-	echo "MANDB_MAP		/opt/python3/share/man	/var/cache/man" >> /etc/man_db.conf
-
-	# Updating the /etc/profile
-	( echo
-          echo "#included by AbdLFS step Python-3.9.1"
-	  echo "export PATH=\$PATH:/opt/python3/bin"
-	  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/python3/lib"
-	) >> /etc/profile
-
-	cd ..; rm -rf Python-3.9.1
-
-
-	# note:
-	# --enable-optimizations appears to not worth time and risk
-	# -> PGO  is a very complex technic que may yield a 10% speed gain for certain codes.
-	# -> LTO  is a GCC optiomization technic that may worth in the future. But not now.
-	#
-	# Python is not in the critical path of anything in the system... So...
-	#
-	# https://gcc.gnu.org/onlinedocs/gccint/LTO-Overview.html
-	# https://en.wikipedia.org/wiki/Profile-guided_optimization
-	#
-	# Abud
 
 # Added dev /opt
 # Llvm-11.0.1

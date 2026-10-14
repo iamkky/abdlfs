@@ -34,9 +34,12 @@ cd $EXTRAS
 # Upgraded
 # OpenSSL-1.1.1w (2025-01-25)
 # From https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz
+# Upgraded
+# openssl-3.0.17 (2025-08-16)
+# From https://github.com/openssl/openssl/releases/download/openssl-3.0.17/openssl-3.0.17.tar.gz
 
-	startStep OpenSSL-1.1.1w
-	tar -xzf openssl-1.1.1w.tar.gz ; cd openssl-1.1.1w
+	startStep openssl-3.0.17
+	tar -xzf openssl-3.0.17.tar.gz ; cd openssl-3.0.17
 
         archname=`$LFS/tools/tmpperl/bin/perl -MConfig -e 'print $Config{archname}'`
         export PERL5LIB="$LFS/tools/tmpperl/lib/5.10.0/$archname:$LFS/tools/tmpperl/lib/5.10.0"
@@ -52,7 +55,7 @@ cd $EXTRAS
 	# install -v -d -m755 /usr/share/doc/openssl-0.9.8g 
 	# cp -v -r doc/{HOWTO,README,*.{txt,html,gif}}  /usr/share/doc/openssl-0.9.8g
 
-	cd $EXTRAS; rm -rf openssl-1.1.1w
+	cd $EXTRAS; rm -rf openssl-3.0.17
 
 
 # Berkeley Yacc
@@ -60,7 +63,7 @@ cd $EXTRAS
 	startStep byacc-20091027
 	tar -xzf byacc.tar.gz; cd byacc-20091027/
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf byacc-20091027
 
@@ -70,18 +73,19 @@ cd $EXTRAS
 	startStep expat-2.2.10
 	tar -xf expat-2.2.10.tar.bz2; cd expat-2.2.10
 	./configure --prefix=/usr 
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf expat-2.2.10
 
 # Added 20260327
 # Libssh2-1.11.1.tar.gz
+# From https://libssh2.org/download/libssh2-1.11.1.tar.bz2
 
 	startStep libssh2-1.11.1
 	tar -xzf libssh2-1.11.1.tar.gz; cd libssh2-1.11.1
 	./configure 	--prefix=/usr 			\
 			--disable-examples-build
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf libssh2-1.11.1
 
@@ -94,7 +98,7 @@ cd $EXTRAS
 			--with-openssl 			\
 			--enable-threaded-resolver	\
 			--with-ca-path=/etc/ssl/certs
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf curl-7.82.0
 
@@ -105,7 +109,9 @@ cd $EXTRAS
 	startStep libpcap-1.7.4
 	tar -xzf libpcap-1.7.4.tar.gz; cd libpcap-1.7.4
 	./configure --prefix=/usr
-	make
+	# Do not install static lib
+	sed -i '/INSTALL_DATA.*libpcap.a\|RANLIB.*libpcap.a/ s/^/#/' Makefile
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf libpcap-1.7.4
 
@@ -228,7 +234,7 @@ EOF
 
 	startStep dhcpcd-3.0.19
 	tar -xjf dhcpcd-3.0.19.tar.bz2 ; cd dhcpcd-3.0.19
-	make
+	make $MAKEJOBS
 	make install
 
 	install -v -d /etc/sysconfig/network-devices/ifconfig.eth0 &&
@@ -257,9 +263,7 @@ EOF
 	# useradd -c "rsyncd Daemon" -d /home/rsync -g rsyncd -s /bin/false -u 48 rsyncd
 
 	./configure --prefix=/usr 
-
-	make
-
+	make $MAKEJOBS
 	make install
 
 	cd $EXTRAS; rm -rf rsync-3.0.2
@@ -292,7 +296,7 @@ EOF
             --with-superuser-path=/bin:/sbin:/usr/sbin:/usr/bin \
             --with-pid-dir=/var/run
 
-	make
+	make $MAKEJOBS
 
 	# Abud - install manuals ok, docs no
 	make install &&
@@ -300,8 +304,8 @@ EOF
 	install -v -m644    contrib/ssh-copy-id.1 /usr/share/man/man1
 
 	# Abud - docs no
-	# install -v -m755 -d /usr/share/doc/openssh-8.7p1
-	# install -v -m644    INSTALL LICENCE OVERVIEW README* /usr/share/doc/openssh-8.7p1
+	# install -v -m755 -d /usr/share/doc/openssh-9.9p2
+	# install -v -m644    INSTALL LICENCE OVERVIEW README* /usr/share/doc/openssh-9.9p2
 
 	# Abud - fixme
 	# echo "PermitRootLogin no" >> /etc/ssh/sshd_config
@@ -314,7 +318,7 @@ EOF
 	# Abud - required by redhat logrotate
 	tar -xzf popt-1.15.tar.gz; cd popt-1.15
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf popt-1.15
 
@@ -324,7 +328,7 @@ EOF
 	startStep logrotate-3.7.1
 	# Using redhat logrotate
 	tar -xzf ./logrotate-3.7.1.tar.gz; cd logrotate-3.7.1
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf logrotate-3.7.1
 	
@@ -332,7 +336,7 @@ EOF
 
 	startStep hdparm-7.7
 	tar -xzf hdparm-7.7.tar.gz; cd hdparm-7.7
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf hdparm-7.7
 
@@ -341,7 +345,7 @@ EOF
 	startStep ethtool-2.6.33-pre1
 	tar -xzf ethtool-2.6.33-pre1.tar.gz; cd ethtool-2.6.33-pre1
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf ethtool-2.6.33-pre1
 
@@ -350,7 +354,7 @@ EOF
 	startStep tcpdump-4.9.1
 	tar -xzf tcpdump-4.9.1.tar.gz; cd tcpdump-4.9.1
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf tcpdump-4.9.1
 
@@ -385,7 +389,7 @@ EOF
 	startStep nmap-7.40
 	tar -xjf nmap-7.40.tar.bz2; cd nmap-7.40
 	./configure --prefix=/usr --without-nmapfe
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf nmap-7.40
 
@@ -395,40 +399,41 @@ EOF
         tar -xjf lsof_4.88.tar.bz2; cd lsof_4.88
         tar -xf lsof_4.88_src.tar; cd lsof_4.88_src;
         ./Configure -n linux
-        make
+	make $MAKEJOBS
         install -v -m0755 -o root -g root lsof /usr/bin
 	cd $EXTRAS; rm -rf lsof_4.88
 
-# quagga
-# Removed
+# openvpn-2.4.6
+# Upgraded 
+# openvpn-2.6.14
+# From: https://build.openvpn.net/downloads/releases/openvpn-2.6.14.tar.gz
 
-#	startStep quagga-0.99.24.1
-#	tar -xzf quagga-0.99.24.1.tar.gz; cd quagga-0.99.24.1
-#	./configure --enable-vty-group=trafman --enable-vtysh --disable-ospfd --disable-ospf6d --disable-ospfapi --disable-ospfclient --disable-ospf-te --disable-doc
-#	make clean
-#	make
-#	make install-strip
-#	cd $EXTRAS; rm -rf quagga-0.99.24.1
-
-# openvpn
-
-	startStep openvpn-2.4.6
-	tar -xzf openvpn-2.4.6.tar.gz; cd openvpn-2.4.6
-	./configure --prefix=/usr --enable-iproute2 --disable-lzo --disable-plugin-auth-pam
-	# --with-openvpn-plugin-dir=/usr/lib/openvpn/plugins
-	# --libdir=/usr/lib
-	make
+	startStep openvpn-2.6.14
+	tar -xzf openvpn-2.6.14.tar.gz; cd openvpn-2.6.14
+	./configure --prefix=/usr --enable-iproute2 --disable-lzo --disable-plugin-auth-pam --disable-lz4
+	make $MAKEJOBS
 	make install
-	cd $EXTRAS; rm -rf openvpn-2.4.6
+	cd $EXTRAS; rm -rf openvpn-2.6.14
 
 # xz-utils
 
 	startStep xz-5.2.2
 	tar -xzf xz-5.2.2.tar.gz; cd xz-5.2.2
 	./configure --prefix=/usr --libdir=/lib
-	make
+	make $MAKEJOBS
 	make pkgconfigdir=/usr/lib/pkgconfig install
 	cd $EXTRAS; rm -rf xz-5.2.2
+
+# Added
+# Libxml2-2.9.14
+# From https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.14.tar.xz
+
+	startStep libxml2-2.9.14
+	tar -xf libxml2-2.9.14.tar.xz; cd libxml2-2.9.14
+	./configure --prefix=/usr --disable-static --with-history
+	make $MAKEJOBS
+	make install
+	cd $EXTRAS; rm -rf libxml2-2.9.14
 
 # Added
 # strace-4.9
@@ -439,14 +444,6 @@ EOF
 	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf strace-4.9
-
-#
-#
-# Abud... Commented to save for later
-# Don't want to put more changes on this
-#
-#
-
 
 # Added
 # lrzsz-0.12.20
@@ -467,7 +464,7 @@ EOF
 	tar -xzf lm-sensors-3-5-0.tar.gz; cd lm-sensors-3-5-0
 	sed -i -e "s/! which/! whereis/" Makefile
 	sed -i -e "sX/usr/localX/usrX" Makefile
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf lm-sensors-3-5-0
 
@@ -479,7 +476,7 @@ EOF
 	./configure \
 		--disable-device-mapper --disable-static --prefix=/usr \
 		--sbindir=/sbin --bindir=/sbin --libdir=/lib --libexecdir=/lib
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf parted-3.1
 
@@ -493,7 +490,7 @@ EOF
 	    --bindir=/sbin --sbindir=/sbin --sbindir=/sbin  \
 	    --libdir=/lib --libexecdir=/lib                 \
 	    --with-pkgconfigdir=/usr/lib/pkgconfig
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf iptables-1.4.21
 
@@ -504,7 +501,7 @@ EOF
 	startStep libtasn1-4.3
 	tar -xf libtasn1-4.3.tar.gz; cd libtasn1-4.3
 	./configure --prefix=/usr --disable-static
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf libtasn1-4.3
 
@@ -515,18 +512,18 @@ EOF
 	startStep nettle-3.1.1
 	tar -xf nettle-3.1.1.tar.gz; cd nettle-3.1.1
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf nettle-3.1.1
 
 # Added
 # gnutls-3.4.5
-# Needed by new wget-2.1
+# Needed by new wget-1.21
 
 	startStep gnutls-3.4.5
 	tar -xf gnutls-3.4.5.tar.xz; cd gnutls-3.4.5
 	./configure --prefix=/usr --without-p11-kit
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf gnutls-3.4.5
 
@@ -543,6 +540,40 @@ EOF
 	cd $EXTRAS; rm -rf wget-1.21
 
 # Added
+# Sudo-1.8.25
+# From http://www.sudo.ws/dist/sudo-1.8.25.tar.gz
+
+	startStep sudo-1.8.25
+	tar -xf sudo-1.8.25.tar.gz; cd sudo-1.8.25
+	./configure --prefix=/ --libexecdir=/lib --with-secure-path --with-all-insults --with-env-editor \
+	            --docdir=/usr/share/doc/sudo-1.8.25 \
+	            --with-passprompt="[sudo] password for %p: " 
+	make $MAKEJOBS
+	make install
+	cd $EXTRAS; rm -rf sudo-1.8.25
+
+# Added
+# Pcre2-10.49
+# From https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.49/pcre2-10.49.tar.bz2
+
+	startStep pcre2-10.49
+	tar -xf pcre2-10.49.tar.bz2; cd pcre2-10.49
+	./configure \
+            --prefix=/usr \
+	    --docdir=/usr/share/doc/pcre2-10.49 \
+	    --enable-unicode \
+	    --enable-jit \
+	    --enable-pcre2-16 \
+	    --enable-pcre2-32 \
+	    --enable-pcre2grep-libz \
+	    --enable-pcre2grep-libbz2 \
+	    --enable-pcre2test-libreadline \
+	    --disable-static 
+	make $MAKEJOBS
+	make install
+	cd $EXTRAS; rm -rf pcre2-10.49
+
+# Added
 # Dmidecode-2.11
 
 	startStep dmidecode-2.11
@@ -553,7 +584,7 @@ EOF
 	sed -i 	-e '1,$s#PROGRAMS := dmidecode \$(PROGRAMS-\$(MACHINE))#PROGRAMS := dmidecode#g' \
 		-e '1,$s#prefix  = /usr/local#prefix  = /usr#g' Makefile
 #		-e '1,$s#install : install-bin install-man install-doc#install : install-bin#g' Makefile
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf dmidecode-2.11
 
@@ -564,7 +595,7 @@ EOF
 	tar -xjf pciutils-3.1.4.tar.bz2
 	cd pciutils-3.1.4
 	sed -i 's#PREFIX=/usr/local#PREFIX=/usr#' Makefile
-	make
+	make $MAKEJOBS
 	make install
 #	make PREFIX=$SRCDIR/$1/usr/local install
 	cd $EXTRAS; rm -rf pciutils-3.1.4
@@ -576,7 +607,7 @@ EOF
 	tar -xzf smartmontools-6.3.tar.gz
 	cd smartmontools-6.3
 	./configure --prefix=/usr --sysconfdir=/etc
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf smartmontools-6.3
 
@@ -587,7 +618,7 @@ EOF
 	tar -xf netcat-0.7.1.tar.gz
 	cd netcat-0.7.1
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf netcat-0.7.1
 
@@ -608,7 +639,7 @@ EOF
 	sleep 10	# Out of Abud stupid mind, configure time should be enough. But...
 	touch aclocal.m4 Makefile.in configure
 
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf libuv-v1.42.0
 
@@ -632,7 +663,7 @@ EOF
             --disable-static        \
 	    --without-python	
 
-	make 
+	make $MAKEJOBS
 
 	make -C lib install
 	make -C bin/dig install
@@ -650,7 +681,7 @@ EOF
 	tar -xf fio-3.38.tar.gz
 	cd fio-3.38
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf fio-3.38
 
@@ -662,7 +693,7 @@ EOF
 	cd iputils-s20121221
 	mv Makefile Makefile.orig
 	sed -e 's/USE_GNUTLS=yes/USE_GNUTLS=no/' Makefile.orig > Makefile
-	make
+	make $MAKEJOBS
 	cp arping /bin
 	cd $EXTRAS; rm -rf iputils-s20121221
 
@@ -687,7 +718,7 @@ EOF
 	startStep picocom-3.1
 	tar -xf picocom-3.1.tar.gz
 	cd picocom-3.1
-	make
+	make $MAKEJOBS
 	strip picocom
 	cp picocom /bin
 	cp picocom.1 /usr/share/man/man.1
@@ -701,7 +732,7 @@ EOF
 	tar -xf netperf-2.7.0.tar.gz
 	cd netperf-netperf-2.7.0
 	./configure --prefix=/usr/bin
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf netperf-netperf-2.7.0
 
@@ -713,7 +744,7 @@ EOF
 	tar -xf iperf-3.1.3-source.tar.gz
 	cd iperf-3.1.3
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf iperf-3.1.3
 
@@ -725,7 +756,7 @@ EOF
         tar -xf pixman-0.22.2.tar.gz
         cd pixman-0.22.2
         ./configure --prefix=/usr
-        make
+	make $MAKEJOBS
         make install
         cd $EXTRAS; rm -rf pixman-0.22.2
 
@@ -809,7 +840,7 @@ EOF
 	tar -xf jq-1.8.1.tar.gz
 	cd jq-1.8.1
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd ..
 	rm -rf jq-1.8.1
@@ -822,12 +853,11 @@ EOF
 	tar -xf libcaca-0.99.beta19.tar.gz
 	cd libcaca-0.99.beta19
 	./configure --prefix=/usr --disable-network --disable-static
-	make
+	make $MAKEJOBS
 	make install
 	rm -fv /usr/bin/cacademo /usr/bin/cacaserver
 	cd ..
 	rm -rf libcaca-0.99.beta19
-
 
 # Added 2026-07-13
 # libevent-2.1.13-stable.tar.gz
@@ -838,8 +868,8 @@ EOF
 	startStep libevent-2.1.13-stable
 	tar -xf libevent-2.1.13-stable.tar.gz
 	cd libevent-2.1.13-stable
-	./configure --prefix=/usr
-	make
+	./configure --prefix=/usr --disable-static
+	make $MAKEJOBS
 	make install
 	cd ..
 	rm -rf libevent-2.1.13-stable
@@ -853,7 +883,7 @@ EOF
 	tar -xf tmux-3.7b.tar.gz
 	cd tmux-3.7b
 	./configure --prefix=/usr
-	make
+	make $MAKEJOBS
 	make install
 	cd ..
 	rm -rf tmux-3.7b
