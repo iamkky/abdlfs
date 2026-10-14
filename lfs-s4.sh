@@ -242,7 +242,7 @@ cd $cdir
 # From https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.33.tar.xz
 
 	startStep libxslt-1.1.33
-	tar -xzf libxslt-1.1.33.tar.gz; cd libxslt-1.1.33
+	tar -xf libxslt-1.1.33.tar.xz; cd libxslt-1.1.33
 
 	# xslt-1.1.20 configure uses wrong syntax for xml2-config
 	# It calls "xml2-config --libs print"
