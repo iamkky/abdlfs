@@ -18,6 +18,22 @@ This project is tailored for complete control and optimization, focusing on flex
 
 ---
 
+## Toolchains and Bootstrapping
+
+Toolchains, shared libraries, assemblers, and bootstrapping are part of a very interesting field of computer technology. Exploring these topics provides a better understanding of the lower layers of software development and how computers, operating systems, and applications work.
+
+For those who want to give it a shot, here are some topics to study:
+
+1. The dynamic linker (ld-linux.so).
+2. The C runtime (crt*.o).
+3. The chicken-and-egg problem with GCC and glibc: GCC needs startup files such as crt1.o provided by the C runtime environment, while glibc itself needs a compiler to be built.
+4. Building toolchains, such as GCC and other compilation systems.
+5. Bootstrapping.
+
+- Mauricio Abud
+
+---
+
 ## System Architecture
 
 ### Build Phases
