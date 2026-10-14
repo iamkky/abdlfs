@@ -490,7 +490,7 @@ cd $LFS/sources
 	cd tcl8.5.7
 	cd unix
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	#TZ=UTC make test
 	make install
 	chmod -v u+w $LFS/tools/lib/libtcl8.5.so
@@ -512,7 +512,7 @@ cd $LFS/sources
 	cp -v configure{,.orig}
 	sed 's:/usr/local/bin:/bin:' configure.orig > configure
 	./configure --prefix=$LFS/tools --with-tcl=$LFS/tools/lib --with-tclinclude=$LFS/tools/include --with-x=no
-	make
+	make $MAKEJOBS
 	#make test
 	make SCRIPTS="" install
 
@@ -526,7 +526,7 @@ cd $LFS/sources
 	tar -xzf dejagnu-1.4.4.tar.gz; cd dejagnu-1.4.4
 
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	make install
 	#make check
 
@@ -540,7 +540,7 @@ cd $LFS/sources
 	tar -xvf ncurses-5.7.tar.gz; cd ncurses-5.7
 
 	./configure --prefix=$LFS/tools --with-shared --without-debug --without-ada --enable-overwrite
-	make
+	make $MAKEJOBS
 	make install
 
 	cd $LFS/sources; rm -rf ncurses-5.7
@@ -637,7 +637,7 @@ cd $LFS/sources
 
 	tar -xjf grep-2.5.4.tar.bz2 ; cd grep-2.5.4
 	./configure --prefix=$LFS/tools  --disable-perl-regexp --without-included-regex
-	make
+	make $MAKEJOBS
 	make install
 	cd $LFS/sources; rm -rf grep-2.5.4
 
@@ -648,7 +648,7 @@ cd $LFS/sources
 	startStep "gzip-1.6.tar.gz"
 	tar -xzf gzip-1.6.tar.gz; cd gzip-1.6
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	make install
 	cd $LFS/sources; rm -rf gzip-1.6
 
@@ -657,7 +657,7 @@ cd $LFS/sources
 	startStep "m4-1.4.13.tar.bz2"
 	tar -xjf m4-1.4.13.tar.bz2; cd m4-1.4.13
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	#make check
 	make install
 	cd $LFS/sources; rm -rf m4-1.4.13
@@ -679,7 +679,7 @@ cd $LFS/sources
 	tar -xzf patch-2.5.9.tar.gz; cd patch-2.5.9
 	patch -Np1 -i ../patch-2.5.9-fixes-1.patch
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	make install
 	cd $LFS/sources; rm -rf patch-2.5.9
 
@@ -701,7 +701,7 @@ cd $LFS/sources
 	startStep "sed-4.2.1.tar.bz2"
 	tar -xjf sed-4.2.1.tar.bz2; cd sed-4.2.1
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	#make check
 	make install
 	cd $LFS/sources; rm -rf sed-4.2.1
@@ -711,7 +711,7 @@ cd $LFS/sources
 	startStep "tar-1.22.tar.bz2"
 	tar -xjf tar-1.22.tar.bz2; cd tar-1.22
 	./configure --prefix=$LFS/tools
-	make
+	make $MAKEJOBS
 	make install
 	cd $LFS/sources; rm -rf tar-1.22
 
