@@ -571,6 +571,16 @@ EOF
 	ln -sfv ../../lib/$(readlink /usr/lib/libcap.so) /usr/lib/libcap.so
 	cd /sources; rm -rf libcap-2.25
 
+# Added
+# libcap-ng-0.8.4.tar.gz
+# From: https://people.redhat.com/sgrubb/libcap-ng/libcap-ng-0.8.4.tar.gz
+
+	startStep libcap-ng-0.8.4.tar.gz
+	tar -xf libcap-ng-0.8.4.tar.gz; cd libcap-ng-0.8.4
+	./configure --without-python3 --prefix=/usr
+	make
+	make install
+	cd /sources; rm -rf libcap-ng-0.8.4
 
 # 6.18. Ncurses-5.7
 
