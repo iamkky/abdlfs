@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# Compile selected terminfo entries at startup.
+
+CONFIG=/etc/terminfo.cfg
+SOURCE=/usr/share/terminfo.src.xz
+TERMINFO_DIR=/var/lib/terminfo
+
+fail()
+{
+    echo "terminfo_setup: ERROR: $*" >&2
+    exit 1
+}
+
+start()
+{
+    # Configuration is optional.
+    if [ ! -r "$CONFIG" ]; then
+        echo "terminfo_setup: No config at $CONFIG; skipping."
+        return 0
+    fi
+
+    . "$CONFIG" || fail "Cannot load $CONFIG"
+
+    if [ -z "$TERMINFO_LIST" ]; then
+        echo "terminfo_setup: TERMINFO_LIST is empty; skipping."
+        return 0
+    fi
+
+    command -v xz >/dev/null 2>&1 ||
+        fail "xz is not installed"
+
+    command -v tic >/dev/null 2>&1 ||
+        fail "tic is not installed"
+
+    [ -r "$SOURCE" ] ||
+        fail "Cannot read $SOURCE"
+
+    mkdir -p "$TERMINFO_DIR" ||
+        fail "Cannot create $TERMINFO_DIR"
+
+    echo "Compiling terminfo entries..."
+
+    xz -dc "$SOURCE" |
+        tic -x -o "$TERMINFO_DIR" \
+            -e "$TERMINFO_LIST" - ||
+        fail "terminfo compilation failed"
+
+    echo "terminfo_setup: done"
+}
+
+case "${1:-start}" in
+    start)
+        start
+        ;;
+    stop)
+        # Nothing to stop.
+        ;;
+    restart|reload)
+        start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|reload}" >&2
+        exit 2
+        ;;
+esac
+
