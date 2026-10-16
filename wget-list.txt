@@ -1,3 +1,4 @@
+https://musl.libc.org/releases/musl-1.2.6.tar.gz
 http://ftp.gnu.org/gnu/autoconf/autoconf-2.64.tar.bz2
 http://ftp.gnu.org/gnu/automake/automake-1.11.tar.bz2
 http://ftp.gnu.org/gnu/bash/bash-4.0.tar.gz

@@ -354,6 +354,8 @@ EOF
 	startStep tcpdump-4.9.1
 	tar -xzf tcpdump-4.9.1.tar.gz; cd tcpdump-4.9.1
 	./configure --prefix=/usr
+	# Makefile install the binary twice, named tcpdump and tcpdump.`cat {$srcdir}/VERSION` -> tcpdump.4.9.1
+	sed -i '/INSTALL_PROGRAM.*cat.*VERSION/d' Makefile
 	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf tcpdump-4.9.1
@@ -546,10 +548,16 @@ EOF
 	startStep sudo-1.8.25
 	tar -xf sudo-1.8.25.tar.gz; cd sudo-1.8.25
 	./configure --prefix=/ --libexecdir=/lib --with-secure-path --with-all-insults --with-env-editor \
-	            --docdir=/usr/share/doc/sudo-1.8.25 \
+	            --datarootdir=/usr/share \
+	            --includedir=/usr/include \
 	            --with-passprompt="[sudo] password for %p: " 
 	make $MAKEJOBS
 	make install
+	cat > /etc/sudoers << "EOF"
+Defaults env_reset
+Defaults secure_path="/sbin:/bin:/usr/sbin:/usr/bin"
+%sudo ALL=(ALL) ALL
+EOF
 	cd $EXTRAS; rm -rf sudo-1.8.25
 
 # Added
@@ -731,7 +739,7 @@ EOF
 	startStep netperf-2.7.0
 	tar -xf netperf-2.7.0.tar.gz
 	cd netperf-netperf-2.7.0
-	./configure --prefix=/usr/bin
+	./configure --prefix=/usr
 	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf netperf-netperf-2.7.0

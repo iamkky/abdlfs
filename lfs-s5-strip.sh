@@ -107,6 +107,9 @@ then
 			rm -f $LFS/$file
 		fi
 	done
+	rm -rf $LFS/usr/lib/gcc
+	rm -rf $LFS/usr/libexec/gcc
+	rm -rf $LFS/usr/share/gcc-*
 	rm -f /tmp/after.sort.txt
 	rm -f /tmp/before.sort.txt
 
@@ -143,7 +146,7 @@ chroot "$LFS" /tools/bin/env -i HOME=/root TERM="$TERM" PS1='\u:\w\$ ' PATH=/too
 
 # Remove /installlogs
 echo; echo 'Remove /installlogs';echo
-rm -rf $LFS/installlogs
+#rm -rf $LFS/installlogs
 
 # Removing toolchain
 echo; echo 'AbdLFS: Removing /tools';echo
