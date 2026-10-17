@@ -117,16 +117,16 @@ cd $cdir
 	ln -s /opt/perl5/bin/perl /usr/bin/perl
 	ln -s /opt/perl5/bin/perl /usr/bin/perl5
 
-	# Updating /etc/man_db.conf
-	echo "MANDATORY_MANPATH		/opt/perl5/man" >> /etc/man_db.conf
-	echo "MANDB_MAP		/opt/perl5/man	/var/cache/man" >> /etc/man_db.conf
+	## Updating /etc/man_db.conf
+	#echo "MANDATORY_MANPATH		/opt/perl5/man" >> /etc/man_db.conf
+	#echo "MANDB_MAP		/opt/perl5/man	/var/cache/man" >> /etc/man_db.conf
 
-	# Updating the /etc/profile
-	( echo
-          echo "#included by AbsLFS step perl-5.10.0"
-	  echo "export PATH=\$PATH:/opt/perl5/bin"
-	  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/perl5/lib"
-	) >> /etc/profile
+	## Updating the /etc/profile
+	#( echo
+        #  echo "#included by AbsLFS step perl-5.10.0"
+	#  echo "export PATH=\$PATH:/opt/perl5/bin"
+	#  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/perl5/lib"
+	#) >> /etc/profile
 
 	cd $cdir; rm -rf perl-5.10.0
 
@@ -224,6 +224,10 @@ cd $cdir
 	./configure --prefix=/usr --with-gitconfig=/etc/gitconfig
 	make $MAKEJOBS
 	make install
+
+	# Abud: striping binaries in /usr/libexec/git-core
+	find /usr/libexec/git-core/ -type f -executable -exec file {} \; | grep ELF | cut -d ':' -f 1 | xargs -r strip --strip-all
+
 	export PATH=$SAVEDPATH
 	cd $cdir; rm -rf git-2.33.8
 
@@ -418,22 +422,27 @@ echo
 	tar xzvf Python-3.9.1.tgz; cd Python-3.9.1
 	./configure --prefix=/opt/python3
 	make $MAKEJOBS
-	make install
+
+	# TEST_MODULES= TESTSUBDIRS= prevents build of python3.9 test framework (/opt/python3/lib/python3.9/test)
+	make TEST_MODULES= TESTSUBDIRS= install
+
+	# Removes python static lib used for embedding python in executables/libs
+	rm -f /opt/python3/lib/python3.9/config-3.9-x86_64-linux-gnu/libpython3.9.a
 
 	# Links for usual #!/usr/bin/perl shebang, Abud
 	ln -s /opt/python3/bin/python3 /usr/bin/python
 	ln -s /opt/python3/bin/python3 /usr/bin/python3
 
-	# Updating /etc/man_db.conf
-	echo "MANDATORY_MANPATH /opt/python3/share/man" >> /etc/man_db.conf
-	echo "MANDB_MAP		/opt/python3/share/man	/var/cache/man" >> /etc/man_db.conf
+	## Updating /etc/man_db.conf
+	#echo "MANDATORY_MANPATH /opt/python3/share/man" >> /etc/man_db.conf
+	#echo "MANDB_MAP		/opt/python3/share/man	/var/cache/man" >> /etc/man_db.conf
 
-	# Updating the /etc/profile
-	( echo
-          echo "#included by AbdLFS step Python-3.9.1"
-	  echo "export PATH=\$PATH:/opt/python3/bin"
-	  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/python3/lib"
-	) >> /etc/profile
+	## Updating the /etc/profile
+	#( echo
+        #  echo "#included by AbdLFS step Python-3.9.1"
+	#  echo "export PATH=\$PATH:/opt/python3/bin"
+	#  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/python3/lib"
+	#) >> /etc/profile
 
 	cd ..; rm -rf Python-3.9.1
 
@@ -465,18 +474,18 @@ echo
 	make $MAKEJOBS
 	make install
 
-	# Updating /etc/man_db.conf
-	echo "MANDATORY_MANPATH                       /opt/cmake3/share/man" >> /etc/man_db.conf
-	echo "MANDATORY_MANPATH                       /opt/cmake3/man" >> /etc/man_db.conf
-	echo "MANDB_MAP		/opt/cmake3/share/man	/var/cache/man" >> /etc/man_db.conf
-	echo "MANDB_MAP		/opt/cmake3/man	/var/cache/man" >> /etc/man_db.conf
+	## Updating /etc/man_db.conf
+	#echo "MANDATORY_MANPATH                       /opt/cmake3/share/man" >> /etc/man_db.conf
+	#echo "MANDATORY_MANPATH                       /opt/cmake3/man" >> /etc/man_db.conf
+	#echo "MANDB_MAP		/opt/cmake3/share/man	/var/cache/man" >> /etc/man_db.conf
+	#echo "MANDB_MAP		/opt/cmake3/man	/var/cache/man" >> /etc/man_db.conf
 
-	# Updating the /etc/profile
-	( echo
-          echo "#included by AbdLFS step cmake-3.19.6"
-	  echo "export PATH=\$PATH:/opt/cmake3/bin"
-	  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/cmake3/lib"
-	) >> /etc/profile
+	## Updating the /etc/profile
+	#( echo
+        #  echo "#included by AbdLFS step cmake-3.19.6"
+	#  echo "export PATH=\$PATH:/opt/cmake3/bin"
+	#  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/cmake3/lib"
+	#) >> /etc/profile
 
 	cd ..; rm -rf cmake-3.19.6
 
@@ -526,16 +535,16 @@ echo
 		rm -f bugpoint llvm-tblgen llvm-xray obj2yaml llvm-exegesis dsymutil c-index-test
 	)
 
-	# Updating /etc/man_db.conf
-	echo "MANDATORY_MANPATH                       /opt/llvm11/share/man" >> /etc/man_db.conf
-	echo "MANDB_MAP		/opt/llvm11/share/man	/var/cache/man" >> /etc/man_db.conf
+	## Updating /etc/man_db.conf
+	#echo "MANDATORY_MANPATH                       /opt/llvm11/share/man" >> /etc/man_db.conf
+	#echo "MANDB_MAP		/opt/llvm11/share/man	/var/cache/man" >> /etc/man_db.conf
 
-	# Updating the /etc/profile
-	( echo
-	  echo "#included by AbdLFS step llvm-project-11.0.1"
-	  echo "export PATH=\$PATH:/opt/llvm11/bin"
-	  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/llvm11/lib"
-	) >> /etc/profile
+	## Updating the /etc/profile
+	#( echo
+	#  echo "#included by AbdLFS step llvm-project-11.0.1"
+	#  echo "export PATH=\$PATH:/opt/llvm11/bin"
+	#  echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/llvm11/lib"
+	#) >> /etc/profile
 
 	cd ..; rm -rf llvm-project-11.0.1.src
 
@@ -548,8 +557,8 @@ echo
 # /opt/extras
 #
 
-	echo "MANDATORY_MANPATH		/opt/extras/share/man" >> /etc/man_db.conf
-	echo "MANDB_MAP			/opt/extras/share/man	/var/cache/man" >> /etc/man_db.conf
+	#echo "MANDATORY_MANPATH		/opt/extras/share/man" >> /etc/man_db.conf
+	#echo "MANDB_MAP			/opt/extras/share/man	/var/cache/man" >> /etc/man_db.conf
 
 
 # SSHD-PermitRootLogin

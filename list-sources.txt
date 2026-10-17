@@ -32,6 +32,7 @@ make-4.0.tar.gz
 module-init-tools-3.12.tar.bz2
 mpfr-3.1.2.tar.bz2
 ncurses-5.7.tar.gz
+ncurses-6.6.tar.gz
 patch-2.5.9.tar.gz
 pkg-config-0.23.tar.gz
 procps-ng-3.3.1.tar.gz

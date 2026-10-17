@@ -53,8 +53,9 @@ function process()
 			ln -s $DIR/AbdLFSExtras/$pkg /opt/$pkg
 			if [ -d /opt/$pkg/bin ]; then
 				(
-				  echo "# Added by devmount"
-				  echo 'PATH=$PATH:'"/opt/$pkg/bin"
+				  echo "# Added by devmount package ($pkg)"
+				  echo 'export PATH=$PATH:'"/opt/$pkg/bin"
+				  echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:'"/opt/$pkg/lib"
 				) >> /etc/profile
 			fi
 			if [ -d /opt/$pkg/lib ]; then

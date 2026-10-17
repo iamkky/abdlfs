@@ -412,7 +412,10 @@ EOF
 		--enable-clocale=gnu \
 		--enable-languages=c,c++ \
 		--disable-multilib --disable-bootstrap \
-		--with-system-zlib
+		--with-system-zlib \
+		--disable-plugin
+
+	# Abud: Disabling GCC plugins removes a substantial set of highly specialized and rarely used installed files.
 
 	make $MAKEJOBS
 
@@ -583,43 +586,71 @@ EOF
 	cd /sources; rm -rf libcap-ng-0.8.4
 
 # 6.18. Ncurses-5.7
+# Upgraded to
+# ncurses-6.6
+# From https://ftp.gnu.org/gnu/ncurses/ncurses-6.6.tar.gz
 
-	startStep 6.18-ncurses-5.7
-	tar -xzf ncurses-5.7.tar.gz; cd ncurses-5.7
+	startStep ncurses-6.6
+	tar -xf ncurses-6.6.tar.gz; cd ncurses-6.6
 
-	./configure --prefix=/usr --with-shared --without-debug --enable-widec \
-		    --mandir=/usr/share/man
+	sed -i 's/#if CPP_HAS_OVERRIDE/#if CPP_HAS_OVERRIDE \&\& defined(__cplusplus) \&\& __cplusplus >= 201103L/' c++/etip.h.in
+
+	./configure --prefix=/usr --libdir=/lib \
+	            --enable-widec \
+	            --mandir=/usr/share/man --with-manpage-format=normal \
+	            --with-shared --without-debug --without-normal \
+	            --with-cxx-shared --with-shared \
+	            --without-ada \
+	            --with-pkg-config-libdir=/usr/lib/pkgconfig \
+	            --disable-db-install
 
 	make
-	make install
-	mv -v /usr/lib/libncursesw.so.5* /lib
-	ln -sfv ../../lib/libncursesw.so.5 /usr/lib/libncursesw.so
 
-	for lib in ncurses form panel menu ; do \
-		rm -vf /usr/lib/lib${lib}.so ; \
-		echo "INPUT(-l${lib}w)" >/usr/lib/lib${lib}.so ; \
-		ln -sfv lib${lib}w.a /usr/lib/lib${lib}.a ; \
+	# Before install make /ust/share/terminfo a line to /var/libterminfo
+	## Not going to compile all terms at this build time
+	## But will keep terminfo.src compressed in system for future compilation.
+	## As /usr can sometimes be read-only I gonna move to /var/lib/terminfo os terms can be added at run time
+	mkdir -pv /var/lib/terminfo
+	mkdir -pv /usr/share
+	ln -s /var/lib/terminfo /usr/share/terminfo
+
+	make install
+
+	# Links from wide to narrow, so that new compilations links with new libs.
+	for lib in ncurses form panel menu; do
+		ln -sfv lib${lib}w.so /lib/lib${lib}.so
+		ln -sfv ${lib}w.pc /usr/lib/pkgconfig/${lib}.pc
 	done
 
-	ln -sfv libncurses++w.a /usr/lib/libncurses++.a
+	# Uses LD_LIBRARY_PATH to make sure linking with new libs
+	LD_LIBRARY_PATH=/lib /usr/bin/tic -x -o /usr/share/terminfo \
+	    -e 'dumb,ansi,vt100,vt220,linux,linux-16color,xterm,xterm-color,xterm-256color,xterm-direct,screen,screen-256color,tmux,tmux-256color,rxvt,rxvt-256color,rxvt-unicode,rxvt-unicode-256color,gnome,gnome-256color,konsole,konsole-256color,putty,putty-256color,cygwin,msys,alacritty,foot,foot-direct,xterm-kitty,wezterm,st-256color' \
+	    misc/terminfo.src
 
-	rm -vf /usr/lib/libcursesw.so
-	echo "INPUT(-lncursesw)" >/usr/lib/libcursesw.so
-	ln -sfv libncurses.so /usr/lib/libcurses.so
-	ln -sfv libncursesw.a /usr/lib/libcursesw.a
-	ln -sfv libncurses.a /usr/lib/libcurses.a
+	sed '/^#/d; /^$/d' misc/terminfo.src | xz -9 > /usr/share/terminfo/terminfo.src.xz
 
-	# Abud - no docs
-	# mkdir -v /usr/share/doc/ncurses-5.7
-	# cp -v -R doc/* /usr/share/doc/ncurses-5.7
+	# Old version 5 narrow character ABI, for support of old binary files linked with those libs
+	make distclean
+	./configure --prefix=/usr --libdir=/lib \
+	            --with-shared --without-debug --without-normal \
+	            --without-cxx-binding \
+	            --without-ada \
+	            --with-abi-version=5
 
-	# Abud - removed 
-	# make distclean
-	# ./configure --prefix=/usr --with-shared --without-normal  --without-debug --without-cxx-binding
-	# make sources libs
-	# cp -av lib/lib*.so.5* /usr/lib
+	make sources libs
+	cp -av lib/lib*.so.5* /lib
 
-	cd /sources; rm -rf ncurses-5.7
+	# libcurses.so for old software that link -lcurses yet
+	ln -sfv libncursesw.so /lib/libcurses.so
+
+	# Forces wide characters for new compilations
+	sed -e 's/^#if.*XOPEN.*$/#if 1/' -i /usr/include/curses.h
+
+	## Install docs
+	# mkdir -pv /usr/share/doc/ncurses-6.6
+	# cp -v -R doc/* /usr/share/doc/ncurses-6.6
+
+	cd /sources; rm -rf ncurses-6.6
 
 # 6.19. Util-linux-ng-2.16
 

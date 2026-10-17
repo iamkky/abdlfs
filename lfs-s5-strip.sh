@@ -146,7 +146,7 @@ chroot "$LFS" /tools/bin/env -i HOME=/root TERM="$TERM" PS1='\u:\w\$ ' PATH=/too
 
 # Remove /installlogs
 echo; echo 'Remove /installlogs';echo
-#rm -rf $LFS/installlogs
+rm -rf $LFS/installlogs
 
 # Removing toolchain
 echo; echo 'AbdLFS: Removing /tools';echo

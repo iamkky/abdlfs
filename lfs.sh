@@ -14,7 +14,7 @@ export KERNEL_VERSION="linux-5.19.9"
 
 if [ "$MAKEJOBS" = "" ]
 then
-        MAKEJOBS="-j 4"
+        MAKEJOBS="-j 8"
 fi
 
 error_trap() {

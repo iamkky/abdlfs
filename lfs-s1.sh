@@ -534,6 +534,7 @@ cd $LFS/sources
 	# ok
 
 # 5.14. Ncurses-5.7
+# From https://ftp.gnu.org/gnu/ncurses/ncurses-5.7.tar.gz
 
 	startStep "ncurses-5.7.tar.gz"
 
