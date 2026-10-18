@@ -193,6 +193,9 @@ cd $cdir
 # Added (20250125)
 # TCL8.5.7 (Required by git-2.33.8)
 
+	# I changed compilation of git to include  --without-tcltk
+	# So tcl is not required by git anymore, but I kept it in the build anyway
+
 	startStep "tcl8.5.7-src.tar.gz"
 
 	tar -xzf tcl8.5.7-src.tar.gz
@@ -221,9 +224,9 @@ cd $cdir
 	# Adding /tools/bin to access msgfmt from toolchain gettext:w
 	SAVEDPATH=$PATH
 	export PATH=$PATH:/tools/bin
-	./configure --prefix=/usr --with-gitconfig=/etc/gitconfig
+	./configure --prefix=/usr --with-gitconfig=/etc/gitconfig --without-tcltk
 	make $MAKEJOBS
-	make install
+	make SKIP_DASHED_BUILT_INS=YesPlease install
 
 	# Abud: striping binaries in /usr/libexec/git-core
 	find /usr/libexec/git-core/ -type f -executable -exec file {} \; | grep ELF | cut -d ':' -f 1 | xargs -r strip --strip-all
@@ -419,12 +422,14 @@ echo
 	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python3/lib
 	export PATH LD_LIBRARY_PATH
 
-	tar xzvf Python-3.9.1.tgz; cd Python-3.9.1
+	tar xf Python-3.9.1.tgz; cd Python-3.9.1
 	./configure --prefix=/opt/python3
 	make $MAKEJOBS
 
-	# TEST_MODULES= TESTSUBDIRS= prevents build of python3.9 test framework (/opt/python3/lib/python3.9/test)
-	make TEST_MODULES= TESTSUBDIRS= install
+	make install
+
+	# Removes python3.9 tests (/opt/python3/lib/python3.9/test)
+	rm -rf /opt/python3/lib/python3.9/test
 
 	# Removes python static lib used for embedding python in executables/libs
 	rm -f /opt/python3/lib/python3.9/config-3.9-x86_64-linux-gnu/libpython3.9.a

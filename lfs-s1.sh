@@ -801,7 +801,7 @@ echo
 # 6.5. Creating Directories
 
 	mkdir -pv $LFS/{bin,boot,etc/opt,home,lib,mnt,opt}
-	mkdir -pv $LFS/{media/{floppy,cdrom},sbin,srv,var}
+	mkdir -pv $LFS/{media/{floppy,cdrom},sbin,var}
 	mkdir -pv $LFS/usr/{,local/}{bin,include,lib,sbin,src}
 	mkdir -pv $LFS/usr/{,local/}share/{doc,info,locale,man}
 	mkdir -v  $LFS/usr/{,local/}share/{misc,terminfo,zoneinfo}
