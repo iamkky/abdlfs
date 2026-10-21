@@ -35,6 +35,12 @@ error_trap() {
 
 trap error_trap ERR
 
+export LC_ALL=C
+export LANGUAGE=C
+
+# Try to avoid building of nls (i18n) in building of gettext based packages
+export LINGUAS=
+
 check_system()
 {
 	find / -type f -print |
@@ -42,7 +48,6 @@ check_system()
 	while read fname; do cksum $fname; done
 }
 
-MKTEST=NO
 LD_LIBRARY_PATH=/lib:/usr/lib
 export LD_LIBRARY_PATH
 
@@ -57,7 +62,7 @@ cd $cdir
 
 	startStep groff-1.20.1
 	tar -xzf groff-1.20.1.tar.gz; cd groff-1.20.1
-	PAGE=A4 ./configure --prefix=/usr
+	PAGE=A4 ./configure --prefix=/usr --disable-nls
 	make $MAKEJOBS
 	make docdir=/usr/share/doc/groff-1.20.1 install
 	ln -sv eqn /usr/bin/geqn
@@ -77,11 +82,6 @@ cd $cdir
 		--with-grap=/usr/bin/grap
 	
 		make
-
-	if [ DD${MKTEST}DD = DDYESDD ]
-	then
-		make check
-	fi
 
 	make install
 
@@ -158,7 +158,7 @@ cd $cdir
 	cd $cdir; rm -rf apr-util-1.3.12
 
 	tar -xzf neon-0.29.6.tar.gz ; cd neon-0.29.6
-	./configure --prefix=/usr
+	./configure --prefix=/usr --disable-nls
 	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf neon-0.29.6
@@ -182,7 +182,7 @@ cd $cdir
 
 	tar -xf gettext-0.17.tar.gz; cd gettext-0.17
 	cd gettext-tools
-	./configure --prefix=/usr --disable-shared
+	./configure --prefix=/usr --disable-shared --disable-nls
 	make -C gnulib-lib
 	make -C src msgfmt
 	cp -v src/msgfmt /usr/bin
@@ -225,8 +225,8 @@ cd $cdir
 	SAVEDPATH=$PATH
 	export PATH=$PATH:/tools/bin
 	./configure --prefix=/usr --with-gitconfig=/etc/gitconfig --without-tcltk
-	make $MAKEJOBS
-	make SKIP_DASHED_BUILT_INS=YesPlease install
+	make NO_GETTEXT=YesPlease $MAKEJOBS
+	make NO_GETTEXT=YesPlease SKIP_DASHED_BUILT_INS=YesPlease install
 
 	# Abud: striping binaries in /usr/libexec/git-core
 	find /usr/libexec/git-core/ -type f -executable -exec file {} \; | grep ELF | cut -d ':' -f 1 | xargs -r strip --strip-all

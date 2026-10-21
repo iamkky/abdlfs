@@ -81,7 +81,7 @@ then
 fi
 
 # Removing locale
-rm -rf $LFS/usr/share/locale/*/LC_MESSAGES/*
+rm -rf $LFS/usr/share/locale/*
 
 # Clearing /tmp
 rm -rf $LFS/tmp/* $LFS/var/tmp/*
@@ -89,7 +89,7 @@ rm -rf $LFS/tmp/* $LFS/var/tmp/*
 # Remove more stuff only if pro environment
 if [ "$dev" = no ]
 then
-	echo; echo 'AbdLFS: Removing gcc, docs, info, man, stati libs (.a) and more from pro';echo
+	echo; echo 'AbdLFS: Removing gcc, docs, info, man, static libs (.a) and more from pro';echo
 
 	# Removing man
 	rm -rf $LFS/usr/include
@@ -117,8 +117,8 @@ then
 	rm -f $LFS/lib/*.a $LFS/usr/lib/*.a $LFS/usr/local/lib/*.a
 
 	# Removing docs and vim stuff
-	rm -rf $LFS/usr/share/info/*
-	rm -rf $LFS/usr/share/doc/*
+	rm -rf $LFS/usr/share/info
+	rm -rf $LFS/usr/share/doc
 	rm -rf $LFS/usr/share/man/*
 
 	# Removing vim stuff

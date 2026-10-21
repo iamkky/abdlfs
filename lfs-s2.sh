@@ -112,21 +112,27 @@ echo
 	cp -v ../glibc-2.23/nscd/nscd.conf /etc/nscd.conf
 	mkdir -pv /var/cache/nscd
 
-	echo "Removing unneeded locales, keeping only en_US"
-	ls /usr/share/i18n/locales/* |
-	grep -v -e 'en_US' -e 'en_GB' -e 'POSIX' -e 'iso14651' -e 'locales/i18n$' -e 'translit_' |
-	while read x
-	do
-		rm -fv $x
-	done
-
-	rm -v /usr/share/i18n/locales/translit_hangul
-	rm -v /usr/share/i18n/locales/translit_cjk_variants
-	rm -v /usr/share/i18n/locales/iso14651_t1_pinyin
-
+	echo "Compiling locale for English (en_US) only system, with iso-8859-1/UFT-8"
 	mkdir -pv /usr/lib/locale
 	localedef -i en_US -f ISO-8859-1 en_US
 	localedef -i en_US -f UTF-8 en_US.UTF-8
+
+	# Removing locale sources
+	rm -rf /usr/share/i18n
+
+	echo "Removing unneeded gconv modules"
+	for module in /usr/lib/gconv/*.so
+	do
+		case "${module##*/}" in
+		UNICODE.so|UTF-16.so|UTF-32.so|IBM437.so|IBM850.so|ISO8859-*.so)
+			echo "Keeping $module"
+			;;
+		*)
+			echo "Removing $module"
+			rm -f "$module"
+			;;
+                esac
+        done
 
 ##	# to install all locales use:
 ##	# make localedata/install-locales
@@ -156,8 +162,6 @@ cat > /etc/ld.so.conf << "EOF"
 # Begin /etc/ld.so.conf
 /usr/lib
 /usr/local/lib
-/opt/lib
-/opt/extras/lib
 # End /etc/ld.so.conf
 EOF
 
@@ -283,7 +287,7 @@ EOF
 	mkdir -v ../binutils-build
 	cd ../binutils-build
 	
-	../binutils-2.24/configure --prefix=/usr  --enable-shared --disable-werror
+	../binutils-2.24/configure --prefix=/usr  --enable-shared --disable-werror --disable-nls
 
 	make $MAKEJOBS tooldir=/usr
 
@@ -413,7 +417,8 @@ EOF
 		--enable-languages=c,c++ \
 		--disable-multilib --disable-bootstrap \
 		--with-system-zlib \
-		--disable-plugin
+		--disable-plugin \
+		--disable-nls
 
 	# Abud: Disabling GCC plugins removes a substantial set of highly specialized and rarely used installed files.
 
@@ -511,7 +516,7 @@ EOF
 	startStep 6.16-sed-4.2.1
 	tar -xjf sed-4.2.1.tar.bz2 ; cd sed-4.2.1
 
-	./configure --prefix=/usr --bindir=/bin --htmldir=/usr/share/doc/sed-4.2.1
+	./configure --prefix=/usr --bindir=/bin --htmldir=/usr/share/doc/sed-4.2.1 --disable-nls
 
 	make
 
@@ -660,7 +665,7 @@ EOF
 	sed -e 's@etc/adjtime@var/lib/hwclock/adjtime@g'  -i $(grep -rl '/etc/adjtime' .)
 	mkdir -pv /var/lib/hwclock
 
-	./configure --enable-arch --enable-partx --enable-write
+	./configure --enable-arch --enable-partx --enable-write --disable-nls
 
 	make
 	make install
@@ -686,7 +691,7 @@ EOF
 	CFLAGS=-I/tools/include              \
 	../configure --prefix=/usr --bindir=/bin --with-root-prefix="" \
 		--enable-elf-shlibs --disable-libblkid --disable-libuuid \
-		--disable-uuidd --disable-fsck
+		--disable-uuidd --disable-fsck --disable-nls
 
 	make
 
@@ -727,7 +732,7 @@ EOF
 
 	patch -Np1 -i ../coreutils-7.4-i18n-1.patch
 
-	./configure --prefix=/usr  --enable-no-install-program=kill,uptime
+	./configure --prefix=/usr --disable-nls --enable-no-install-program=kill,uptime
 
 	make $MAKEJOBS
 
@@ -784,7 +789,7 @@ EOF
 
 	startStep 6.24-bison-2.4.1
 	tar -xjf bison-2.4.1.tar.bz2; cd bison-2.4.1
-	./configure --prefix=/usr
+	./configure --prefix=/usr --disable-nls
 	echo '#define YYENABLE_NLS 1' >> config.h
 	make
 
@@ -826,7 +831,8 @@ EOF
 	tar -xjf grep-2.5.4.tar.bz2 ; cd grep-2.5.4
 
 	patch -Np1 -i ../grep-2.5.4-debian_fixes-1.patch
-	./configure --prefix=/usr --bindir=/bin --without-included-regex
+	./configure --prefix=/usr --bindir=/bin --without-included-regex --disable-nls
+
 
 	make
 
@@ -885,7 +891,7 @@ EOF
 #	patch -Np1 -i ../bash-4.0-fixes-3.patch
 
 	./configure --prefix=/usr --bindir=/bin \
-		--htmldir=/usr/share/doc/bash-4.4.18 --without-bash-malloc
+		--htmldir=/usr/share/doc/bash-4.4.18 --without-bash-malloc --disable-nls
 
 	make $MAKEJOBS
 
@@ -1032,7 +1038,7 @@ EOF
 
 	touch man/diff.1
 
-	./configure --prefix=/usr
+	./configure --prefix=/usr --disable-nls
 	make $MAKEJOBS
 	make install
 
@@ -1063,7 +1069,7 @@ EOF
 	startStep 6.38-gawk-3.1.7
 	tar -xjf gawk-3.1.7.tar.bz2 ; cd gawk-3.1.7
 
-	./configure --prefix=/usr --libexecdir=/usr/lib
+	./configure --prefix=/usr --libexecdir=/usr/lib --disable-nls
 	make $MAKEJOBS
 	
 	# Abud - needs visual check
@@ -1088,7 +1094,7 @@ EOF
 	startStep 6.39-findutils-4.4.2
 	tar -xzf findutils-4.4.2.tar.gz ; cd findutils-4.4.2
 	
-	./configure --prefix=/usr --libexecdir=/usr/lib/findutils  --localstatedir=/var/lib/locate
+	./configure --prefix=/usr --libexecdir=/usr/lib/findutils  --localstatedir=/var/lib/locate --disable-nls
 	make $MAKEJOBS
 
 	# Abud - needs visual checl
@@ -1113,7 +1119,7 @@ EOF
 	tar -xjf flex-2.5.35.tar.bz2 ; cd flex-2.5.35
 
 	patch -Np1 -i ../flex-2.5.35-gcc44-1.patch
-	./configure --prefix=/usr
+	./configure --prefix=/usr --disable-nls
 	make
 	
 	# Abud - needs visual check
@@ -1248,7 +1254,7 @@ EOF
 	startStep 6.47-make-4.0
 	tar -xzf make-4.0.tar.gz ; cd make-4.0
 
-	./configure --prefix=/usr
+	./configure --prefix=/usr --disable-nls
 	make $MAKEJOBS
 
 	# Abud - needs visual checl
@@ -1333,7 +1339,7 @@ EOF
 	startStep 6.51-psmisc-22.8
 	tar -xzf psmisc-22.8.tar.gz ; cd psmisc-22.8
 
-	./configure --prefix=/usr --exec-prefix=""
+	./configure --prefix=/usr --exec-prefix="" --disable-nls
 	make
 	make install
 
@@ -1359,7 +1365,7 @@ EOF
 	#sed -i '1,$s/FAILLOG_ENAB.*yes/FAILLOG_ENAB no/'       etc/login.defs
 	#sed -i '1,$s/LASTLOG_ENAB.*yes/LASTLOG_ENAB no/'       etc/login.defs
 
-	./configure --sysconfdir=/etc
+	./configure --sysconfdir=/etc --disable-nls
 	make
 	make install
 
@@ -1430,7 +1436,7 @@ EOF
 	startStep 6.55-tar-1.22
 	tar -xjf tar-1.22.tar.bz2 ; cd tar-1.22
 
-	./configure --prefix=/usr --bindir=/bin --libexecdir=/usr/sbin
+	./configure --prefix=/usr --bindir=/bin --libexecdir=/usr/sbin --disable-nls
 	make
 
 	# Abud - needs visual check
@@ -1724,8 +1730,8 @@ EOF
 
 	cat > /etc/profile << "EOF"
 export LANG=en_US.iso88591
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/extras/bin:/opt/extras/sbin
-export LD_LIBRARY_PATH=/lib:/usr/lib:/opt/extras/lib
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin
+export LD_LIBRARY_PATH=/lib:/usr/lib
 EOF
 
 # 7.11. Configuring the localnet Script

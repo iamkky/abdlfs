@@ -163,6 +163,7 @@ echo
 		--target=$LFS_TGT \
 		--disable-nls \
 		--disable-werror
+
 	make $MAKEJOBS
 		#--with-lib-path=$LFS/tools/lib \
 		#--with-sysroot=$LFS \
@@ -802,17 +803,17 @@ echo
 
 	mkdir -pv $LFS/{bin,boot,etc/opt,home,lib,mnt,opt}
 	mkdir -pv $LFS/{media/{floppy,cdrom},sbin,var}
-	mkdir -pv $LFS/usr/{,local/}{bin,include,lib,sbin,src}
-	mkdir -pv $LFS/usr/{,local/}share/{doc,info,locale,man}
-	mkdir -v  $LFS/usr/{,local/}share/{misc,terminfo,zoneinfo}
-	mkdir -pv $LFS/usr/{,local/}share/man/man{1..8}
+	mkdir -pv $LFS/usr/{bin,include,lib,sbin,src}
+	mkdir -pv $LFS/usr/share/{doc,info,locale,man}
+	mkdir -v  $LFS/usr/share/{misc,terminfo,zoneinfo}
+	mkdir -pv $LFS/usr/share/man/man{1..8}
 	mkdir -v  $LFS/var/{lock,log,mail,run,spool}
 	mkdir -pv $LFS/var/{opt,cache,lib/{misc,locate},local}
 
 	install -dv -m 0750 $LFS/root
 	install -dv -m 1777 $LFS/tmp $LFS/var/tmp
 
-	for dir in /usr /usr/local; do ln -sv share/{man,doc,info} $LFS$dir; done
+	ln -sv share/{man,doc,info} $LFS/usr
 
 	case $(uname -m) in
 		x86_64) ln -sv lib $LFS/lib64 && ln -sv lib $LFS/usr/lib64 ;;

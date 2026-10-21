@@ -24,10 +24,14 @@ error_trap() {
 
 trap error_trap ERR
 
-export EXTRAS=/extensions
 export LC_ALL=C
 export LANGUAGE=C
 
+# Try to avoid building of nls (i18n) in building of gettext based packages 
+export LINGUAS=
+
+# Go to source dir for extension packages
+export EXTRAS=/extensions
 cd $EXTRAS
 
 # OpenSSL-1.0.1u
@@ -390,7 +394,7 @@ EOF
 
 	startStep nmap-7.40
 	tar -xjf nmap-7.40.tar.bz2; cd nmap-7.40
-	./configure --prefix=/usr --without-nmapfe
+	./configure --prefix=/usr --without-nmapfe --disable-nls
 	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf nmap-7.40
@@ -421,7 +425,7 @@ EOF
 
 	startStep xz-5.2.2
 	tar -xzf xz-5.2.2.tar.gz; cd xz-5.2.2
-	./configure --prefix=/usr --libdir=/lib
+	./configure --prefix=/usr --libdir=/lib --disable-nls
 	make $MAKEJOBS
 	make pkgconfigdir=/usr/lib/pkgconfig install
 	cd $EXTRAS; rm -rf xz-5.2.2
@@ -476,6 +480,7 @@ EOF
 	startStep parted-3.1
 	tar -xf parted-3.1.tar.gz; cd parted-3.1
 	./configure \
+		--disable-nls \
 		--disable-device-mapper --disable-static --prefix=/usr \
 		--sbindir=/sbin --bindir=/sbin --libdir=/lib --libexecdir=/lib
 	make $MAKEJOBS
@@ -536,7 +541,7 @@ EOF
 
 	startStep wget-1.21
 	tar -xzf wget-1.21.tar.gz; cd wget-1.21
-	./configure --prefix=/usr --sysconfdir=/etc --disable-nls --disable-iri
+	./configure --prefix=/usr --sysconfdir=/etc --disable-nls --disable-iri --disable-nls
 	make $MAKEJOBS
 	make install
 	cd $EXTRAS; rm -rf wget-1.21
@@ -821,7 +826,11 @@ EOF
 		--disable-dmg \
 		--disable-parallels \
 		--disable-sheepdog \
-		--enable-trace-backend=nop
+		--enable-trace-backend=nop \
+		--disable-bochs \
+		--disable-qed \
+		--disable-libxml2 \
+		--disable-tcg
 	sed -ie 's/TOOLS=qemu-ga.*/TOOLS=qemu-ga$(EXESUF) qemu-img$(EXESUF) fsdev\/virtfs-proxy-helper$(EXESUF)/' config-host.mak
 	make $MAKEJOBS
 	make install
