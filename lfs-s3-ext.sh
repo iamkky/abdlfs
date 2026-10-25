@@ -947,11 +947,11 @@ EOF
 # Added Lua-5.2.2 (2026-10-24)
 # From https://www.lua.org/ftp/lua-5.2.2.tar.gz
 
-	startStep "lua-5.2.2"
+	startStep lua-5.2.2
 	tar -xf lua-5.2.2.tar.gz; cd lua-5.2.2
 
 	# /usr/local => /usr in Makefile
-	sed -ie '1,$s#INSTALL_TOP= /usr/local#INSTALL_TOP= /usr#' Makefile
+	sed -ie 's#/usr/local#/usr#' Makefile
 
 	make linux
 	make install
@@ -962,10 +962,19 @@ EOF
 	cd ..
 	rm -rf lua-5.2.2
 
+# Added luasocket-3.1.0.tar.gz
+# From https://github.com/lunarmodules/luasocket/archive/refs/tags/v3.1.0.tar.gz
+#
+#	startStep luasocket-3.1.0
+#	tar -xf luasocket-3.1.0.tar.gz; cd luasocket-3.1.0
+#
+#	maybe next time
+
+
 # Added Pod2mdoc-0.2
 # From https://mandoc.bsd.lv/pod2mdoc/snapshots/pod2mdoc-0.2.tgz
 
-	startStep "pod2mdoc-0.2"
+	startStep pod2mdoc-0.2
 	tar -xf pod2mdoc-0.2.tgz; cd pod2mdoc-0.2
 
 	# There is no OHASH in system
@@ -982,19 +991,21 @@ EOF
 # Added Vmtouch-1.3.1 (2026-10-24)
 # From https://github.com/hoytech/vmtouch/archive/refs/tags/v1.3.1.tar.gz
 
-	startStep "vmtouch-1.3.1"
+	startStep vmtouch-1.3.1
 	tar -xf vmtouch-1.3.1.tar.gz; cd vmtouch-1.3.1
 
 	# Remove man compilationg using pos2man
 	sed -ie 's#all: vmtouch vmtouch.8#all: vmtouch#' Makefile
+	sed -ie 's#/usr/local#/sur#' Makefile
 
 	make
 
 	# used pod2mdoc instead
 	pod2mdoc -s 8 -n "System Manager's Manual" vmtouch.pod > vmtouch.8
 
-	strip --strip-all /usr/bin/vmtouch
 	PREFIX=/usr make install
+
+	strip --strip-all /usr/bin/vmtouch
 
 	cd ..
 	rm -rf vmtouch-1.3.1
