@@ -64,12 +64,13 @@ rm -rf $LFS/usr/share/vim/vim72/doc
 rm -rf $LFS/usr/share/vim/vim72/tutor
 
 # clean /usr/share/doc
-rm -rf $LFS/usr/share/doc/groff-1.20.1
-rm -rf $LFS/usr/share/doc/libxml2-2.7.8
-rm -rf $LFS/usr/share/doc/bzip2-1.0.5
-rm -rf $LFS/usr/share/doc/libxslt-1.1.20
-rm -rf $LFS/usr/share/doc/valgrind
-rm -rf $LFS/usr/share/doc/bash-4.4.18
+rm -rf $LFS/usr/share/doc
+#rm -rf $LFS/usr/share/doc/groff-1.20.1
+#rm -rf $LFS/usr/share/doc/libxml2-2.7.8
+#rm -rf $LFS/usr/share/doc/bzip2-1.0.5
+#rm -rf $LFS/usr/share/doc/libxslt-1.1.20
+#rm -rf $LFS/usr/share/doc/valgrind
+#rm -rf $LFS/usr/share/doc/bash-4.4.18
 
 # clean /usr/share/man
 if [ -d $LFS/usr/share/man ]

@@ -114,8 +114,14 @@ echo
 
 	echo "Compiling locale for English (en_US) only system, with iso-8859-1/UFT-8"
 	mkdir -pv /usr/lib/locale
-	localedef -i en_US -f ISO-8859-1 en_US
-	localedef -i en_US -f UTF-8 en_US.UTF-8
+
+	# Force use of POSIC defs to create a synthetic C.UTF-8 locale
+	# the -c and '|| true' are needed because the localdef complains about incomplete locale definitions in POSIX
+	localedef -c -i POSIX -f UTF-8 C.UTF-8 || true
+
+	# Add en_US for compatiability
+	localedef    -i en_US -f UTF-8 en_US.UTF-8
+	localedef    -i en_US -f ISO-8859-1 en_US
 
 	# Removing locale sources
 	rm -rf /usr/share/i18n
@@ -443,6 +449,14 @@ EOF
 	install -v -dm755 /usr/lib/bfd-plugins
 	ln -sfv ../../libexec/gcc/$(gcc -dumpmachine)/5.2.0/liblto_plugin.so /usr/lib/bfd-plugins/
 
+	mkdir -pv /usr/share/gdb/auto-load/usr/lib
+	mv -v /usr/lib/*gdb.py /usr/share/gdb/auto-load/usr/lib
+
+	# Compressing the large man page
+	gzip -9 /usr/man/man1/gcc.1
+	rm -f /usr/man/man1/g++.1
+	ln -s gcc.1.gz /usr/man/man1/g++.1.gz
+
 	# Abud - needs visual check
 	if [ DD${MKTEST}DD = DDYESDD ]
 	then
@@ -503,9 +517,6 @@ EOF
 		rm -v dummy.c a.out dummy.log
 		) &> ${LOGS}/check-${LFSSTEP}-2.log
 	fi
-
-	mkdir -pv /usr/share/gdb/auto-load/usr/lib
-	mv -v /usr/lib/*gdb.py /usr/share/gdb/auto-load/usr/lib
 
 	cd /sources; rm -rf gcc-5.2.0; rm -rf gcc-build
 
@@ -611,13 +622,14 @@ EOF
 
 	make
 
-	# Before install make /ust/share/terminfo a line to /var/libterminfo
-	## Not going to compile all terms at this build time
-	## But will keep terminfo.src compressed in system for future compilation.
-	## As /usr can sometimes be read-only I gonna move to /var/lib/terminfo os terms can be added at run time
+	# Terminfo in /usr/share is sym linked to /var/lib/terminfo.
+	# This allows the system to run with a read-only /usr and a reduced database,
+	# while still permitting the addition of new terminfo definitions in /var/lib.
+
+	echo "linking /usr/share/terminfo -> ../../var/lib/terminfo"
 	mkdir -pv /var/lib/terminfo
 	mkdir -pv /usr/share
-	ln -s /var/lib/terminfo /usr/share/terminfo
+	ln -s ../../var/lib/terminfo /usr/share/terminfo
 
 	make install
 
@@ -626,6 +638,8 @@ EOF
 		ln -sfv lib${lib}w.so /lib/lib${lib}.so
 		ln -sfv ${lib}w.pc /usr/lib/pkgconfig/${lib}.pc
 	done
+
+	# Will keep terminfo.src compressed in system for future compilation if needed.
 
 	# Uses LD_LIBRARY_PATH to make sure linking with new libs
 	LD_LIBRARY_PATH=/lib /usr/bin/tic -x -o /usr/share/terminfo \
@@ -908,6 +922,9 @@ EOF
 	fi
 
 	make install
+
+	# Compressing the manual
+	gzip -9 /usr/man/man1/bash.1
 
 	# fixme - need to start new script here.
 	# exec /bin/bash --login +h
@@ -1540,7 +1557,13 @@ EOF
 	patch -Np1 -i ../vim-7.2-fixes-5.patch
 
 	echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
-	./configure --prefix=/usr --enable-multibyte
+	./configure \
+		--prefix=/usr \
+		--enable-multibyte \
+		--disable-nls \
+		--disable-selinux \
+		--disable-xsmp \
+		--without-x
 
 	make $MAKEJOBS
 
@@ -1556,12 +1579,13 @@ EOF
 
 	make install
 
-	ln -sv vim /usr/bin/vi
-	for L in /usr/share/man/{,*/}man1/vim.1; do
-		ln -sv vim.1 $(dirname $L)/vi.1
-	done
+	rm -rf /usr/share/vim/vim72/spell
+	rm -rf /usr/share/vim/vim72/lang
 
-	ln -sv ../vim/vim72/doc /usr/share/doc/vim-7.2
+	ln -sv vim /usr/bin/vi
+
+	gzip -9 /usr/share/man/man1/vim.1
+	ln -sv vim.1.gz /usr/share/man/man1/vi.1.gz
 
 	cat > /etc/vimrc << "EOF"
 " Begin /etc/vimrc
@@ -1573,11 +1597,6 @@ set background=dark
 endif
 " End /etc/vimrc
 EOF
-
-	# Abud - ????
-	# vim -c ':options'
-	# set spelllang=en,ru
-	# set spell
 
 	cd /sources; rm -rf vim72
 
@@ -1729,7 +1748,7 @@ EOF
 # 7.8. The Bash Shell Startup Files
 
 	cat > /etc/profile << "EOF"
-export LANG=en_US.iso88591
+export LANG=C.UTF-8
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin
 export LD_LIBRARY_PATH=/lib:/usr/lib
 EOF

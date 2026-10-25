@@ -805,7 +805,7 @@ echo
 	mkdir -pv $LFS/{media/{floppy,cdrom},sbin,var}
 	mkdir -pv $LFS/usr/{bin,include,lib,sbin,src}
 	mkdir -pv $LFS/usr/share/{doc,info,locale,man}
-	mkdir -v  $LFS/usr/share/{misc,terminfo,zoneinfo}
+	mkdir -v  $LFS/usr/share/{misc,zoneinfo}
 	mkdir -pv $LFS/usr/share/man/man{1..8}
 	mkdir -v  $LFS/var/{lock,log,mail,run,spool}
 	mkdir -pv $LFS/var/{opt,cache,lib/{misc,locate},local}

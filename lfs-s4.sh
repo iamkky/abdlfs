@@ -141,38 +141,84 @@ cd $cdir
 	make install
 	cd $cdir; rm -rf cpio-2.11
 
-# SVN
+# Subversion-1.6.16
 
-	startStep SVN-1.6.16
-
+	startStep 'apr-1.4.5 (required subversion-1.6.16)'
 	tar -xzf apr-1.4.5.tar.gz ; cd apr-1.4.5
 	./configure --prefix=/usr
 	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf apr-1.4.5
 
+	startStep 'apr-util-1.3.12 (required subversion-1.6.16)'
 	tar -xzf apr-util-1.3.12.tar.gz ; cd apr-util-1.3.12
 	./configure --prefix=/usr --with-apr=/usr
 	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf apr-util-1.3.12
 
+	startStep 'neon-0.29.6 (required subversion-1.6.16)' 
 	tar -xzf neon-0.29.6.tar.gz ; cd neon-0.29.6
 	./configure --prefix=/usr --disable-nls
 	make $MAKEJOBS
 	make install
 	cd $cdir; rm -rf neon-0.29.6
 
-	tar -xzf sqlite-autoconf-3070603.tar.gz ; cd sqlite-autoconf-3070603
-	./configure --prefix=/usr
-	make $MAKEJOBS
-	make install
-	cd $cdir; rm -rf sqlite-autoconf-3070603
+# Left for future upgrade of subversion
+# Added Serf-1.3.9
+# From https://archive.apache.org/dist/serf/serf-1.3.9.tar.bz2
+# Required by subversion-1.11.1
+# Not added (requires SCons, that req python)
+
+# From https://archive.apache.org/dist/subversion/subversion-1.10.8.tar.gz
+# --with-lz4=internal e --with-utf8proc=internal
+
+#	tar -xzf subversion-1.11.1.tar.gz ; cd subversion-1.11.1
+
+#	# Addes sql amalgamation to svn
+#	# From https://sqlite.org/2018/sqlite-amalgamation-3250300.zip
+#	unzip ../sqlite-amalgamation-3250300.zip
+#	mv sqlite-amalgamation-3250300 sqlite-amalgamation
+
+#	./configure \
+#		--prefix=/usr \
+#		--with-sqlite="$PWD/sqlite-amalgamation" \
+#		--with-lz4=internal \
+#		--with-utf8proc=internal \
+#		--disable-nls \
+#		--disable-debug \
+#		--disable-static \
+#		--enable-shared
+
+#	make $MAKEJOBS
+#	make install
+#	cd $cdir; rm -rf subversion-1.6.16
+
+	startStep subversion-1.6.16
 
 	tar -xzf subversion-1.6.16.tar.gz ; cd subversion-1.6.16
-	./configure --prefix=/usr
+
+	# Adds sqlite3 amalgamation to svn.
+	# To provide sqlite requested version and do not depend on system sqlite version
+	# From http://www.sqlite.org/sqlite-amalgamation-3.6.13.tar.gz
+
+	tar -xf ../sqlite-amalgamation-3.6.13.tar.gz
+	mv sqlite-3.6.13 sqlite-amalgamation
+
+	./configure \
+		--prefix=/usr \
+		--includedir=/tmp/svninclude \
+		--disable-nls \
+		--disable-debug \
+		--disable-static \
+		--enable-shared
+
 	make $MAKEJOBS
 	make install
+
+	# Removing includes (not developing/embedding svn)
+	rm -rf /tmp/svninclude
+
 	cd $cdir; rm -rf subversion-1.6.16
 
 # Added (20250125)
@@ -201,16 +247,23 @@ cd $cdir
 	tar -xzf tcl8.5.7-src.tar.gz
 	cd tcl8.5.7
 	cd unix
-	./configure --prefix=/usr
+	./configure --prefix=/usr --mandir=/tmp/tclman --disable-nls
 	make $MAKEJOBS
 	make install
-	make install-private-headers
 
 	#chmod -v u+w $LFS/tools/lib/libtcl8.5.so
 	ln -sv tclsh8.5 /usr/bin/tclsh
 
+	# Needed for a future Expect install
+	make install-private-headers
+
+	# Remove man pages
+	rm -rf /tmp/tclman
+
+	# Remove messages (i18n)
+	rm -rf /usr/lib/tcl8.5/msgs
+
 	cd $cdir; rm -rf tcl8.5.7
-	# Ok
 
 # Added 20230812
 # Git-2.1.0
@@ -221,12 +274,22 @@ cd $cdir
 	startStep git-2.33.8
 	tar -xf git-2.33.8.tar.xz ; cd git-2.33.8
 	sed -i "/BSD_SOURCE/d" git-compat-util.h
-	# Adding /tools/bin to access msgfmt from toolchain gettext:w
-	SAVEDPATH=$PATH
-	export PATH=$PATH:/tools/bin
-	./configure --prefix=/usr --with-gitconfig=/etc/gitconfig --without-tcltk
-	make NO_GETTEXT=YesPlease $MAKEJOBS
-	make NO_GETTEXT=YesPlease SKIP_DASHED_BUILT_INS=YesPlease install
+	## XXX TEST
+	## Adding /tools/bin to access msgfmt from toolchain gettext:w
+	#SAVEDPATH=$PATH
+	#export PATH=$PATH:/tools/bin
+	CFLAGS="-Os -g0  -fno-asynchronous-unwind-tables -fno-unwind-tables" ./configure --prefix=/usr --with-gitconfig=/etc/gitconfig --without-tcltk
+	make \
+		NO_GETTEXT=YesPlease \
+		SKIP_DASHED_BUILT_INS=YesPlease \
+		NO_PYTHON=YesPlease \
+		$MAKEJOBS
+	make \
+		INSTALL_STRIP=-s \
+		NO_GETTEXT=YesPlease \
+		SKIP_DASHED_BUILT_INS=YesPlease \
+		NO_PYTHON=YesPlease \
+		install
 
 	# Abud: striping binaries in /usr/libexec/git-core
 	find /usr/libexec/git-core/ -type f -executable -exec file {} \; | grep ELF | cut -d ':' -f 1 | xargs -r strip --strip-all

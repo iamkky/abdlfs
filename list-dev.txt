@@ -4,8 +4,8 @@ man-db-2.5.5-fix_testsuite-1.patch
 perl-5.10.0.tar.gz
 apr-1.4.5.tar.gz
 apr-util-1.3.12.tar.gz
+sqlite-amalgamation-3.6.13.tar.gz
 neon-0.29.6.tar.gz
-sqlite-autoconf-3070603.tar.gz
 subversion-1.6.16.tar.gz
 ctags-5.8.tar.gz
 qemu-0.14.1.tar.gz

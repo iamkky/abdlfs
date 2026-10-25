@@ -47,9 +47,10 @@ cd $EXTRAS
 
         archname=`$LFS/tools/tmpperl/bin/perl -MConfig -e 'print $Config{archname}'`
         export PERL5LIB="$LFS/tools/tmpperl/lib/5.10.0/$archname:$LFS/tools/tmpperl/lib/5.10.0"
-	#export PERL5LIB=/tools/tmpperl/lib/5.10.0/i686-linux
+
 	./config --openssldir=/etc/ssl --prefix=/usr shared zlib-dynamic
-	make MANDIR=/usr/share/man
+	make $MAKEJOBS \
+		MANDIR=/usr/share/man
 
 	# Does not install docs
 	# Because docs installation requires pod2html
@@ -233,6 +234,16 @@ EOF
 #
 #	cd $EXTRAS; rm -rf fcron-3.0.3 
 #
+
+# Added UnZip 6.0
+# From 'https://sourceforge.net/projects/infozip/files/UnZip 6.x (latest)/UnZip 6.0/unzip60.tar.gz'
+# From https://sourceforge.net/projects/infozip/files/UnZip%206.x%20%28latest%29/UnZip%206.0/unzip60.tar.gz
+
+	startStep unzip60
+	tar -xf unzip60.tar.gz ; cd unzip60
+	make -f unix/Makefile generic
+	make prefix=/usr MANDIR=/usr/share/man/man1  -f unix/Makefile install
+	cd $EXTRAS; rm -rf unzip60
 
 # dhcpcd-3.0.19
 
@@ -639,7 +650,7 @@ EOF
 # libuv-v1.42.0 (2025-01-25, cause bind-9.16.20)
 # From https://dist.libuv.org/dist/v1.42.0/libuv-v1.42.0.tar.gz
 
-	startStep libuv-v1.42.0
+	startStep 'libuv-v1.42.0 (required by bind-9.16.20)'
 	tar -xf libuv-v1.42.0.tar.gz
 	cd libuv-v1.42.0
 
@@ -812,6 +823,7 @@ EOF
 	cd build
 
 	export QEMU_ARCH=x86_64-softmmu
+	CFLAGS=" -fno-asynchronous-unwind-tables -fno-unwind-tables" \
 	../configure --python=/tools/tmppython2/bin/python \
 		--prefix=/usr \
 		--sysconfdir=/etc \
@@ -830,7 +842,9 @@ EOF
 		--disable-bochs \
 		--disable-qed \
 		--disable-libxml2 \
-		--disable-tcg
+		--disable-tcg \
+		--disable-debug-info
+
 	sed -ie 's/TOOLS=qemu-ga.*/TOOLS=qemu-ga$(EXESUF) qemu-img$(EXESUF) fsdev\/virtfs-proxy-helper$(EXESUF)/' config-host.mak
 	make $MAKEJOBS
 	make install
@@ -905,6 +919,85 @@ EOF
 	cd ..
 	rm -rf tmux-3.7b
 
+
+# Added Sqlite-3.54.1 (2026-10-24)
+# From https://sqlite.org/2026/sqlite-autoconf-3540100.tar.gz
+
+	startStep "sqlite3-54.1"
+	tar -xf sqlite-autoconf-3540100.tar.gz; cd sqlite-autoconf-3540100
+	
+	./configure \
+		--prefix=/usr \
+		--enable-fts{4,5} \
+		--disable-static \
+		--disable-static-shell \
+		--enable-column-metadata \
+		--enable-dbstat \
+		CPPFLAGS=" \
+			-D SQLITE_ENABLE_UNLOCK_NOTIFY=1   \
+			-D SQLITE_ENABLE_DBSTAT_VTAB=1     \
+			-D SQLITE_SECURE_DELETE=1" 
+
+	make $MAKEJOBS
+	make install
+
+	cd ..
+	rm -rf sqlite-autoconf-3540100
+
+# Added Lua-5.2.2 (2026-10-24)
+# From https://www.lua.org/ftp/lua-5.2.2.tar.gz
+
+	startStep "lua-5.2.2"
+	tar -xf lua-5.2.2.tar.gz; cd lua-5.2.2
+
+	# /usr/local => /usr in Makefile
+	sed -ie '1,$s#INSTALL_TOP= /usr/local#INSTALL_TOP= /usr#' Makefile
+
+	make linux
+	make install
+
+	strip --strip-all /usr/bin/lua /usr/bin/luac
+	strip --strip-unneeded /usr/lib/liblua.a
+
+	cd ..
+	rm -rf lua-5.2.2
+
+# Added Pod2mdoc-0.2
+# From https://mandoc.bsd.lv/pod2mdoc/snapshots/pod2mdoc-0.2.tgz
+
+	startStep "pod2mdoc-0.2"
+	tar -xf pod2mdoc-0.2.tgz; cd pod2mdoc-0.2
+
+	# There is no OHASH in system
+	sed -ie 's#DHAVE_OHASH=1#DHAVE_OHASH=0#' Makefile
+
+	make
+
+	strip --strip-all pod2mdoc
+	cp pod2mdoc /usr/bin
+
+	cd ..
+	rm -rf pod2mdoc-0.2
+
+# Added Vmtouch-1.3.1 (2026-10-24)
+# From https://github.com/hoytech/vmtouch/archive/refs/tags/v1.3.1.tar.gz
+
+	startStep "vmtouch-1.3.1"
+	tar -xf vmtouch-1.3.1.tar.gz; cd vmtouch-1.3.1
+
+	# Remove man compilationg using pos2man
+	sed -ie 's#all: vmtouch vmtouch.8#all: vmtouch#' Makefile
+
+	make
+
+	# used pod2mdoc instead
+	pod2mdoc -s 8 -n "System Manager's Manual" vmtouch.pod > vmtouch.8
+
+	strip --strip-all /usr/bin/vmtouch
+	PREFIX=/usr make install
+
+	cd ..
+	rm -rf vmtouch-1.3.1
 
 ############################################################################################
 ########## End of Packages Compilations
