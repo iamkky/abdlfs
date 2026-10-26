@@ -57,22 +57,26 @@ rm -rf $LFS/sources
 rm -rf $LFS/extensions
 rm -rf $LFS/lfs-*.sh
 
-# clean /usr/share
-rm -rf $LFS/usr/share/gtk-doc
+# clean /usr/share/info
+rm -rf $LFS/usr/share/doc
 rm -rf $LFS/usr/share/info
+rm -rf $LFS/usr/share/gtk-doc
+
+# Removing localization database (not supporting translated messages)
+# This is software translated messages for supported languages
+rm -rf $LFS/usr/share/locale/*
+
+# No doc/spell for vim, neither tutorial
 rm -rf $LFS/usr/share/vim/vim72/doc
 rm -rf $LFS/usr/share/vim/vim72/tutor
+rm -rf $LFS/usr/share/vim/vim72/spell
 
-# clean /usr/share/doc
-rm -rf $LFS/usr/share/doc
-#rm -rf $LFS/usr/share/doc/groff-1.20.1
-#rm -rf $LFS/usr/share/doc/libxml2-2.7.8
-#rm -rf $LFS/usr/share/doc/bzip2-1.0.5
-#rm -rf $LFS/usr/share/doc/libxslt-1.1.20
-#rm -rf $LFS/usr/share/doc/valgrind
-#rm -rf $LFS/usr/share/doc/bash-4.4.18
-
+#
 # clean /usr/share/man
+# This will remove translated manuais that goes in /usr/share/man/<lang>/manX
+# This will remove translated manuais that goes in /usr/share/man/<lang>/catX
+# Keeping only /usr/share/man/manX and /usr/share/man/catX
+#
 if [ -d $LFS/usr/share/man ]
 then
 (
@@ -81,24 +85,16 @@ then
 )
 fi
 
-# Removing locale
-rm -rf $LFS/usr/share/locale/*
-
-# Clearing /tmp
-rm -rf $LFS/tmp/* $LFS/var/tmp/*
-
-# Remove more stuff only if pro environment
+# Remove more stuff in pro environment
 if [ "$dev" = no ]
 then
-	echo; echo 'AbdLFS: Removing gcc, docs, info, man, static libs (.a) and more from pro';echo
-
-	# Removing man
-	rm -rf $LFS/usr/include
+	echo; echo 'AbdLFS: Removing gcc, docs, info, man, static libs (.a) and more from pro'; echo
 
 	# Removing gcc keeping libraries !
-	sort $LFS/installlogs/cksum.gcc.after.txt > /tmp/after.sort.txt
-	sort $LFS/installlogs/cksum.gcc.before.txt > /tmp/before.sort.txt
-	diff /tmp/before.sort.txt /tmp/after.sort.txt |
+	sort $LFS/installlogs/cksum.gcc.after.txt > /tmp/gcc.after.sort.txt
+	sort $LFS/installlogs/cksum.gcc.before.txt > /tmp/gcc.before.sort.txt
+
+	diff /tmp/gcc.before.sort.txt /tmp/gcc.after.sort.txt |
 	egrep -e '^>'| awk '{ print $4 }' |
 	while read file
         do
@@ -108,24 +104,50 @@ then
 			rm -f $LFS/$file
 		fi
 	done
+
+	rm  -f /tmp/gcc.after.sort.txt
+	rm  -f /tmp/gcc.before.sort.txt
+	
+	# Removes the link cc -> gcc
+	rm  -f $LFS/usr/bin/cc
 	rm -rf $LFS/usr/lib/gcc
 	rm -rf $LFS/usr/libexec/gcc
 	rm -rf $LFS/usr/share/gcc-*
-	rm -f /tmp/after.sort.txt
-	rm -f /tmp/before.sort.txt
+
+	# Removing includes
+	rm -rf $LFS/usr/include
 
 	# Removing static libs
-	rm -f $LFS/lib/*.a $LFS/usr/lib/*.a $LFS/usr/local/lib/*.a
+	rm  -f $LFS/lib/*.a $LFS/usr/lib/*.a $LFS/usr/local/lib/*.a
 
-	# Removing docs and vim stuff
-	rm -rf $LFS/usr/share/info
-	rm -rf $LFS/usr/share/doc
-	rm -rf $LFS/usr/share/man/*
+	# Removing unneeded in /usr/share
+	# Most os those dir contains:
+	# Documentations, development related material, and nor used GUI related data
+	for dir in info man doc aclocal bison gdb libtool getopt applications icons
+	do
+		if [ -d "$LFS/usr/share/$dir" ]; then
+			rm -rf "$LFS/usr/share/$dir"
+		else
+			echo "Warning: $LFSSCRIPTNAME: Trying to remove unexistent $LFS/usr/share/$dir"
+		fi
+	done
 
-	# Removing vim stuff
-	rm -rf $LFS/usr/share/vim/vim72/spell
+	# Remove unneeded in /usr/bin
+	# Most of those binaries are development related
+	for bin in \
+		addr2line ar as bison c++filt caca-config cc curl-config event_rpcgen.py          \
+		flex gdbus-codegen gencat glib-genmarshal glib-gettextize glib-mkenums gtester    \
+		gtester-report ld ld.bfd lex libtool libtoolize make ncursesw6-config nm          \
+		objcopy onig-config pcap-config pcre2-config pcre2test pkg-config pod2mdoc rpcgen \
+		strip xml2-config yacc
+	do
+		if [ -f "$LFS/usr/bin/$bin" ]; then
+			rm -rf "$LFS/usr/bin/$bin"
+		else
+			echo "Warning: $LFSSCRIPTNAME: Trying to remove unexistent $LFS/usr/bin/$bin"
+		fi
+	done
 fi
-
 
 # If dev find binaries and libraries to strip in /opt
 if [ "$dev" = yes ]
@@ -144,6 +166,9 @@ chroot "$LFS" /tools/bin/env -i HOME=/root TERM="$TERM" PS1='\u:\w\$ ' PATH=/too
 echo; echo 'AbdLFS: Stripping binaries';echo
 chroot "$LFS" /tools/bin/env -i HOME=/root TERM="$TERM" PS1='\u:\w\$ ' PATH=/tools/bin \
 	/tools/bin/find /{,usr/}{bin,sbin} $STRIP_BINDIR -type f -exec /tools/bin/strip --strip-all '{}' ';'
+
+# Clearing /tmp
+rm -rf $LFS/tmp/* $LFS/var/tmp/*
 
 # Remove /installlogs
 echo; echo 'Remove /installlogs';echo

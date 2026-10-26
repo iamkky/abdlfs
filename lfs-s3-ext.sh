@@ -706,7 +706,14 @@ EOF
 	cd fio-3.38
 	./configure --prefix=/usr
 	make $MAKEJOBS
-	make install
+
+	# Instead of make install
+	# Install only fio executable and man. Not utilities
+	install -m 755 -d /usr/bin
+	install fio ./tools/genfio /usr/bin
+	install -m 755 -d /usr/man/man1
+	install -m 644 ./fio.1 /usr/man/man1
+
 	cd $EXTRAS; rm -rf fio-3.38
 
 # Added

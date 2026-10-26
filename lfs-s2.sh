@@ -112,10 +112,27 @@ echo
 	cp -v ../glibc-2.23/nscd/nscd.conf /etc/nscd.conf
 	mkdir -pv /var/cache/nscd
 
+
+	# Important note:
+	#
+	# /usr/lib/locale contains locale data used by glibc functions:
+	#    (charmap and locale information, like money symbol, date format, etc...)
+	#
+	# /usr/i18n/share contains the source of this information and
+	# can be compiled to file in /usr/lib/locale/locale-archive
+	#
+	#  so   /usr/i18n/share -> compilation -> /usr/lib/locale
+	#
+	# It's completelly unrelated to /usr/share/locale that contains 
+	# the translated messages of apps that use  gettext to print its messages in multiplem languages.
+	#
+	# The source of confusion is because both uses "locale"
+	# 
+
 	echo "Compiling locale for English (en_US) only system, with iso-8859-1/UFT-8"
 	mkdir -pv /usr/lib/locale
 
-	# Force use of POSIC defs to create a synthetic C.UTF-8 locale
+	# Force use of POSIX defs to create a synthetic C.UTF-8 locale
 	# the -c and '|| true' are needed because the localdef complains about incomplete locale definitions in POSIX
 	localedef -c -i POSIX -f UTF-8 C.UTF-8 || true
 

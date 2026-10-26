@@ -273,12 +273,11 @@ cd $cdir
 
 	startStep git-2.33.8
 	tar -xf git-2.33.8.tar.xz ; cd git-2.33.8
+
 	sed -i "/BSD_SOURCE/d" git-compat-util.h
-	## XXX TEST
-	## Adding /tools/bin to access msgfmt from toolchain gettext:w
-	#SAVEDPATH=$PATH
-	#export PATH=$PATH:/tools/bin
-	CFLAGS="-Os -g0  -fno-asynchronous-unwind-tables -fno-unwind-tables" ./configure --prefix=/usr --with-gitconfig=/etc/gitconfig --without-tcltk
+
+	# Size optimizatons for git. Git has some huge binaries!
+	CFLAGS="-Os -g0 -fno-asynchronous-unwind-tables -fno-unwind-tables" ./configure --prefix=/usr --with-gitconfig=/etc/gitconfig --without-tcltk
 	make \
 		NO_GETTEXT=YesPlease \
 		SKIP_DASHED_BUILT_INS=YesPlease \
@@ -294,7 +293,6 @@ cd $cdir
 	# Abud: striping binaries in /usr/libexec/git-core
 	find /usr/libexec/git-core/ -type f -executable -exec file {} \; | grep ELF | cut -d ':' -f 1 | xargs -r strip --strip-all
 
-	export PATH=$SAVEDPATH
 	cd $cdir; rm -rf git-2.33.8
 
 # CTAGS
