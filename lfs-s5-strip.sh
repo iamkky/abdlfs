@@ -1,5 +1,74 @@
 #!/bin/sh
 
+
+#  For future consideration about library removam um production environment
+
+#  #  Strong Candidates from Removal:
+#  libasan			GCC AddressSanitizer runtime
+#  liblsan			GCC LeakSanitizer runtime
+#  libtsan			GCC ThreadSanitizer runtime
+#  libubsan			GCC UndefinedBehaviorSanitizer runtime
+#  libcilkrts			GCC Cilk Plus parallel programming runtime
+#  libvtv			C++ virtual table verification
+#  libitm			GCC transactional memory
+#  libgomp-plugin-host_nonshm	OpenMP offloading plugin
+#  libSegFault			glibc stack-trace/debugging helper
+#  libmemusage			glibc memory-usage profiling
+#  libpcprofile			glibc program-counter profiling
+#  libBrokenLocale		Compatibility with legacy locale behavior
+#  sotruss-lib			Support library for glibc's sotruss tracing utility
+#  libncurses++w		C++ wrappers for ncurses
+#  libgnutlsxx			C++ wrapper for GnuTLS
+#  libgmpxx			C++ wrapper for GMP
+#  libpcre2-posix		POSIX regex compatibility interface for PCRE2
+#  
+#  # More Strong Candidates for Removal
+#  libmvec			glibc vectorized mathematical functions	(Not required for ordinary scalar libm operations)
+#  libquadmath			128-bit floating-point mathematics	(Usually unnecessary outside specialized numerical software
+#  libmpc			Complex-number mathematics used by GCC	(Required for some GCC components at build/runtime)
+#  libssp			GCC stack-smashing protection runtime	(Do not confuse with glibc's built-in stack protector support)
+#  
+#  # More Removal Candidates (but very dependent on what is installed)
+#  libatomic			GCC atomic operations					(Keep if any programs require its runtime symbols)
+#  libgdbm, libgdbm_compat	GNU database manager					(Needed only for applications using GDBM database)
+#  libform, libmenu, libpanel	Optional ncurses user-interface libraries		(Not required by basic terminal operations)
+#  libcaca++			C++ interface for libcaca				(Not needed for the C interface)
+#  libssh2			SSH client protocol library	Independent of OpenSSH  (only required by applications using libssh2)
+#  libltdl			Libtool dynamic-module loader				(May be used for loading plugins)
+#  libparted-fs-resize		Filesystem resize support for libparted			(Check whether your parted build uses it)
+#  
+#  # More Removal Candidates
+#  libevent, libevent_extra,	Event loop and asynchronous I/O	Remove only if no applications use them
+#  libevent_openssl,
+#  libevent_pthreads
+#
+#  # Script to find libs in use by executables
+#
+#  find / -type f -exec file -L {} + 2>/dev/null | 
+#    grep -E 'ELF.*(executable|shared object)' |
+#    cut -d: -f1 |
+#    while IFS= read -r file; do ldd "$file" 2>/dev/null; done |
+#    awk '/=> \// {print $3} /^[[:space:]]*\// {print $1}' |
+#    while read f; do basename $f; done |
+#    sed -E 's/(-[0-9.]+)?\.so.*$//' |
+#    sort -u > 
+#		/tmp/libs.txt
+#
+#
+#  # Script to find shared objects in system (NOT ALL ARE DYNAMIC LIBRARIES USED BY EXECUTABLE)
+#
+#  find /lib /usr/lib /opt \( -type f -o -type l \) -name '*.so*' -exec file -L {} + 2>/dev/null |
+#    grep 'ELF.*shared object' |
+#    cut -d: -f1 |
+#    while IFS= read -r f; do basename "$f"; done |
+#    sed -E 's/(-[0-9.]+)?\.so.*$//' |
+#    sort -u >
+#		/tmp/libs_in_system.txt
+#
+#
+
+
+
 set +h
 LFSSCRIPTNAME=${BASH_SOURCE[0]}
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Starting $LFSSCRIPTNAME"; echo
@@ -119,6 +188,12 @@ then
 
 	# Removing static libs
 	rm  -f $LFS/lib/*.a $LFS/usr/lib/*.a $LFS/usr/local/lib/*.a
+
+	# No more compilations in pro  env
+	rm -rf $LFS/usr/lib/pkgconfig
+	rm -rf $LFS/lib/pkgconfig
+
+	rm -rf $LFS/usr/lib/cmake
 
 	# Removing unneeded in /usr/share
 	# Most os those dir contains:
