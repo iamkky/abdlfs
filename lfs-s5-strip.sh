@@ -93,9 +93,19 @@ error_trap() {
 
 trap error_trap ERR
 
-if [ D"$LFS" = "D" ]
+startStep "Checking if '$LFS' is a LFS build dir and it's not '/'"
+
+if [ -z "$LFS" ] || [ "$LFS" = "/" ]
 then
-	echo "You need to set "'$LFS'
+        echo "$LFSSCRIPTNAME: Error: LFS variable is empty or it is '/'"
+        exit 1
+fi
+
+if ! [ -f "$LFS"/etc/abd-lfs-build.info ]
+then
+	echo "Dir '$LFS' does not contain 'etc/abd-lfs-build.info'"
+	echo "Is it really an LFS build dir?"
+	echo " ==> $LFSSCRIPTNAME removes a lot of things, take care to not run it in wrong dir"
 	exit -1
 fi
 
@@ -116,6 +126,7 @@ fi
 
 # Clearing final system
 echo; echo 'AbdLFS: Clearing final system';echo
+
 
 # Removing toolchain sources and files
 rm -rf $LFS/reqs
@@ -246,6 +257,10 @@ rm -rf $LFS/installlogs
 # Removing toolchain
 echo; echo 'AbdLFS: Removing /tools';echo
 rm -rf $LFS/tools
+
+# Cleaning an unsolved problema
+echo; echo 'AbdLFS: Removing /storage'; echo
+rm -rf $LFS/storage
 
 echo; echo "AbdLFS: $(date +%Y%m%d-%H%M%S) - Finished $LFSSCRIPTNAME"; echo
 
