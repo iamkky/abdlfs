@@ -135,12 +135,6 @@ rm -rf $LFS/usr/share/gtk-doc
 # This is software translated messages for supported languages
 rm -rf $LFS/usr/share/locale/*
 
-# No doc/spell for vim, neither tutorial
-rm -rf $LFS/usr/share/vim/vim72/doc
-rm -rf $LFS/usr/share/vim/vim72/tutor
-rm -rf $LFS/usr/share/vim/vim72/spell
-
-#
 # clean /usr/share/man
 # This will remove translated manuais that goes in /usr/share/man/<lang>/manX
 # This will remove translated manuais that goes in /usr/share/man/<lang>/catX

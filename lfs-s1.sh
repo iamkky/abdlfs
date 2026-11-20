@@ -863,6 +863,7 @@ cdrom:x:15:
 sudo:x:27:
 mail:x:34:
 nogroup:x:99:
+users:x:1000:
 EOF
 
 touch $LFS/var/run/utmp $LFS/var/log/{btmp,lastlog,wtmp}

@@ -1596,8 +1596,11 @@ EOF
 
 	make install
 
+	# No spell, no doc, no i18nm, neither tutorial
 	rm -rf /usr/share/vim/vim72/spell
+	rm -rf /usr/share/vim/vim72/doc
 	rm -rf /usr/share/vim/vim72/lang
+	rm -rf /usr/share/vim/vim72/tutor
 
 	ln -sv vim /usr/bin/vi
 

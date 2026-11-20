@@ -572,7 +572,7 @@ EOF
 	cat > /etc/sudoers << "EOF"
 Defaults env_reset
 Defaults secure_path="/sbin:/bin:/usr/sbin:/usr/bin"
-%sudo ALL=(ALL) ALL
+%sudo ALL=(ALL:ALL) ALL
 EOF
 	cd $EXTRAS; rm -rf sudo-1.8.25
 
