@@ -107,8 +107,6 @@ Usage()
 		exit -1
 	fi
 
-	LFS_CPIO_FULLPATH=$(readlink -e $LFS_CPIO)
-
 	if [ -z "$CONFIG" ]; then
 		CONFIG="kconfig/config.kernel.$KARCH.$KVERSION"
 	fi
@@ -130,6 +128,7 @@ Usage()
 	cp $CONFIG ./linux-$KVERSION/.config
 	echo "Using: $CONFIG"
 
+	LFS_CPIO_FULLPATH=$(readlink -e $LFS_CPIO)
 	LFS_BASE_NAME=`basename $LFS_CPIO .cpio.gz`
 	LFS_KERNEL_NAME="$LFS_BASE_NAME.k-$KARCH"
 

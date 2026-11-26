@@ -17,8 +17,9 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 	{
 		echo "Usage: $0 [OPTION] <BASE_CPIO>"
 		echo ""
-		echo " -h                 Help"
-		echo " -karch ARCH        Kernel architecture to compile (x86|x86_64)"
+		echo " -h                               Help"
+		echo " -karch ARCH                      Kernel architecture to compile (x86|x86_64)"
+		echo " -ksource <kernel source dir>     Kernel source dir"
 		echo ""
 		echo " BASE_CPIO          A cpio.gz file used as base to assemble the final system"
 		echo ""
@@ -35,7 +36,8 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 			;;
 		-karch)
 			shift
-			KARCH=$1; shift
+			KARCH=$1;
+			shift
 			case $KARCH in
 				x86_64|x86) ;;
 				*) 
@@ -44,10 +46,17 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 				;;
 			esac
 			;;
+		-ksource)
+			shift
+			KSOURCE=$1;
+			shift
+			;;
+
 		*)
 			if [ -z "$LFS_CPIO" ]
 			then
-				LFS_CPIO=$1; shift
+				LFS_CPIO=$1;
+				shift
 			else
 				echo "invalid argument " $(shift)
 				exit -1
@@ -55,6 +64,16 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 			;;
 		esac
 	done
+
+	if [ -z "$KSOURCE" ]; then
+		echo "-ksource <kernel source dir> is mandatory"
+		exit 1
+	fi
+
+	if [ ! -d "$KSOURCE" ]; then
+		echo "There is no $KSOURCE dir"
+		exit 1
+	fi
 
 	if [ -z "$KARCH" -o "$KARCH" = "x86" ]; then
 		TGT=i686
@@ -71,15 +90,22 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 	fi
 
 	LFS_CPIO_FULLPATH=$(readlink -e $LFS_CPIO)
+	LFS_BASE_NAME=`basename $LFS_CPIO .cpio.gz`
+	LFS_KERNEL_NAME="$LFS_BASE_NAME.k-$KARCH"
 
 	GCCTARGET=`gcc -dumpmachine`
 	NEWTARGET=$TGT-pc-linux-gnu
 	#NEWTARGET=$TGT-unknown-linux-gnu
 
 	echo "Cpio image: $LFS_CPIO_FULLPATH"
+	echo 
+	echo "LFS Basename: $LFS_BASE_NAME"
 	echo "Kenrel ARCH: $KARCH"
 	echo "Default gcc target: $GCCTARGET"
 	echo "New target: $NEWTARGET"
+
+	localdir=`pwd`
+	cd "$KSOURCE"
 
 	#sed -i -e '1,$s@/tmp/1.cpio.gz@'$LFS_CPIO_FULLPATH'@' .config
 	sed -i -e 's@CONFIG_INITRAMFS_SOURCE=".*"@CONFIG_INITRAMFS_SOURCE="'$LFS_CPIO_FULLPATH'"@' .config
@@ -89,7 +115,6 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 		echo "Missing CONFIG_INITRAMFS_SOURCE= from config"
 		exit -1
 	fi
-		
 
 #	if [ "$GCCTARGET" != "$NEWTARGET" ]; then
 #		CROSSGCC=`command -v $NEWTARGET-gcc`
@@ -116,6 +141,12 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 	esac
 
 	make $ARCHFLAG bzImage
+
+	if [ ! -f arch/x86/boot/bzImage ]; then
+		mv arch/x86/boot/bzImage "$localdir"/"$LFS_BASE_NAME"-"$KSOURCE"-"$KARC".bzImage
+	fi
+
+	cd "$localdir"
 
 	echo "DONE: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 

@@ -64,11 +64,11 @@ function process()
 				  echo "/opt/$pkg/lib"
 				) >> /etc/ld.so.conf
 			fi
-			for mandir in $(find . -type d -name man)
+			for mandir in $(find "/opt/$pkg" -type d -name man)
 			do
 				(
-				  echo "MANDATORY_MANPATH $DIR/AbdLFSExtras/$pkg/$mandir"
-				  echo "MANDB_MAP $DIR/AbdLFSExtras/$pkg/$mandir /var/cache/man" 
+				  echo "MANDATORY_MANPATH $mandir"
+				  echo "MANDB_MAP $mandir /var/cache/man" 
 				) >> /etc/man_db.conf	
 			done
 		done

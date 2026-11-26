@@ -525,6 +525,152 @@ echo
 	#
 	# Abud
 
+# Added httpd-2.4.71
+# From https://dlcdn.apache.org/httpd/httpd-2.4.71.tar.bz2
+
+	cd $cdir
+	startStep httpd-2.4.71
+
+	tar -xf httpd-2.4.71.tar.bz2; cd httpd-2.4.71
+
+	groupadd -g 25 apache
+	useradd -c "Apache Server" -d /var/apache2 -g apache -s /bin/false -u 25 apache
+
+	sed -i \
+		-e 's/^User daemon$/User apache/' \
+		-e 's/^Group daemon$/Group apache/' \
+		docs/conf/httpd.conf.in	
+
+	cat >> config.layout <<'EOF'
+<Layout AbdLFS>
+    prefix:          /opt/apache2
+    exec_prefix:     ${prefix}
+    bindir:          ${exec_prefix}/bin
+    sbindir:         ${exec_prefix}/bin
+    libdir:          ${exec_prefix}/lib
+    libexecdir:      ${exec_prefix}/modules
+    includedir:      ${prefix}/include
+    mandir:          ${prefix}/man
+    datadir:         ${prefix}
+    installbuilddir: ${prefix}/build
+    errordir:        ${prefix}/error
+    iconsdir:        ${prefix}/icons
+    manualdir:       ${prefix}/manual
+    sysconfdir:      /etc/apache2
+    htdocsdir:       /var/apache2/htdocs
+    cgidir:          /var/apache2/cgi
+    logfiledir:      /var/apache2/logs
+    runtimedir:      /var/apache2/logs
+    localstatedir:   /var/apache2
+    proxycachedir:   /var/apache2/proxy
+</Layout>
+EOF
+
+	./configure \
+		--enable-layout=AbdLFS \
+		--enable-mpms-shared=all \
+		--enable-mods-shared="all cgi" \
+		--disable-lua \
+		--disable-proxy-ajp \
+		--disable-proxy-balancer \
+		--disable-proxy-fcgi \
+		--with-mpm=prefork \
+		--with-apr=/usr/bin/apr-1-config \
+		--with-apr-util=/usr/bin/apu-1-config \
+		--enable-suexec=shared \
+		--with-suexec-bin=/opt/apache2/bin/suexec \
+		--with-suexec-caller=apache \
+		--with-suexec-docroot=/var/apache2 \
+		--with-suexec-uidmin=1000 \
+		--with-suexec-userdir=public_html \
+		--with-suexec-logfile=/var/apache2/logs/suexec.log
+
+	make $MAKEJOBS
+	make install
+
+	rm -rf /opt/apache2/share
+	rm -rf /opt/apache2/manual
+
+	chown root:apache /opt/apache2/bin/suexec
+	chmod 4750 /opt/apache2/bin/suexec
+
+	chown -R apache:apache /var/apache2	
+
+	cd ..; rm -rf httpd-2.4.71
+
+# Add php-8.6.0
+# From https://downloads.php.net/~windows/releases/archives/php-8.6.0-src.zip
+
+	# Old GCC doesn't recognize several AVX-512 feature names like: avx512dq avx512cd avx512bw avx512vl avx512vbmi
+	# Debian people provided a patch
+	# https://sources.debian.org/data/main/p/php8.6/8.6.0-3/debian/patches/0040-Disable-avx-detection-with-gcc-6.patch 
+	# But wasn't used in the end: because used php_cv_have_avx512=no php_cv_have_avx512vbmi=no 
+	cd $cdir
+	startStep php-8.6.0
+
+	mkdir php-8.6.0; cd php-8.6.0
+	unzip ../php-8.6.0-src.zip
+
+	#patch  -p1 < 0040-Disable-avx-detection-with-gcc-6.patch
+
+	# Disable ifunc because of old gcc
+	sed -i '/^#if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) &&/i #undef HAVE_FUNC_ATTRIBUTE_IFUNC\n' Zend/zend_portability.h
+
+	# looks like my glibc does not have copy_file_range
+	# my old GCC does not support all avx512 operation required
+
+	CFLAGS="-O2" \
+	php_cv_func_copy_file_range=no  \
+	php_cv_have_avx512=no           \
+	php_cv_have_avx512vbmi=no       \
+	./configure \
+		--prefix=/opt/php                    \
+		--sysconfdir=/etc/php                \
+		--localstatedir=/var/php             \
+		--datadir=/opt/php/share             \
+		--mandir=/opt/php/man                \
+		--with-config-file-path=/etc/php     \
+		--without-pear                       \
+		--with-apxs2=/opt/apache2/bin/apxs   \
+		--with-zlib                          \
+		                                     \
+		--enable-posix               \
+		--with-iconv                 \
+		--enable-bcmath              \
+		--with-bz2                   \
+		--enable-calendar            \
+		--disable-dba                \
+		--without-gdbm               \
+		--with-gmp=shared            \
+		--enable-ftp=shared          \
+		--with-gettext               \
+		--enable-mbstring            \
+		--disable-mbregex            \
+		--with-readline              \
+		--enable-pdo                 \
+		--with-pdo-mysql=mysqlnd     \
+		--with-pdo-sqlite            \
+		--enable-exif                \
+		--enable-fileinfo=shared     \
+		                             \
+		--disable-sysvshm            \
+		--disable-sysvsem            \
+		--disable-sysvmsg            \
+		                             \
+		--disable-phpdbg             \
+		--disable-cgi                \
+		--disable-fpm 
+
+	make $MAKEJOBS
+	make install INSTALL_HEADERS=
+
+	strip --strip-debug /opt/apache2/modules/libphp.so
+	strip --strip-all   /opt/php/bin/php
+
+	install -v -m644 php.ini-production /etc/php.ini
+
+	cd ..; rm -rf php-8.6.0
+
 # Added dev /opt
 # Cmake-3.19.6
 
@@ -618,6 +764,15 @@ echo
 echo "#########################################################################"
 echo "########################  FINAL MINOR ADJUSTS  ##########################"
 echo
+
+	startStep "Add instructions to motd" 
+
+	cat >> /etc/motd << "EOF"
+
+   - AbdLFS (devmount) will autodetect and mount filesystem with label like
+     abdlfs_st_<ID> at /storage/<ID> mount point in the system start up.
+
+EOF
 
 #####################
 # /opt/extras

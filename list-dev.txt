@@ -19,9 +19,6 @@ libcgi-1.0.tar.gz
 swig-1.3.25.tar.gz
 nasm-2.08rc5.tar.gz
 gdb-7.8.2.tar.gz
-llvm-project-11.0.1.src.tar.xz
-cmake-3.19.6.tar.gz
-Python-3.9.1.tgz
 squashfs4.4.tar.gz
 cdrtools-3.01.tar.bz2
 autoconf-2.69.tar.xz
@@ -30,3 +27,8 @@ elfutils-0.165.tar.bz2
 gettext-0.17.tar.gz
 tcl8.5.7-src.tar.gz
 git-2.33.8.tar.xz
+httpd-2.4.71.tar.bz2
+php-8.6.0-src.zip
+Python-3.9.1.tgz
+cmake-3.19.6.tar.gz
+llvm-project-11.0.1.src.tar.xz

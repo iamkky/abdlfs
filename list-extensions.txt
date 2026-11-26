@@ -49,6 +49,8 @@ Python-2.7.15.tar.xz
 glib-2.56.1.tar.xz
 qemu-4.2.0.tar.xz
 libcaca-0.99.beta19.tar.gz
+figlet-2.2.5.tar.gz
+toilet-0.3.tar.gz
 expat-2.2.10.tar.bz2
 gnutls-3.4.5.tar.xz
 nettle-3.1.1.tar.gz

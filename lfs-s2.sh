@@ -252,40 +252,15 @@ EOF
 
 
 # 6.11. Zlib-1.2.3
+# Upgraded to zlib-1.2.13
 
-	startStep 6.11-zlib-1.2.3
-	tar -xjf zlib-1.2.3.tar.bz2 ; cd zlib-1.2.3
-
-	./configure --prefix=/usr --shared --libdir=/lib
-
-	make
-	# Abud - needs visual check
-	if [ DD${MKTEST}DD = DDYESDD ]
-	then
-		make check &> ${LOGS}/check-${LFSSTEP}-1.log
-	fi
-
-	make install
-
-	rm -v /lib/libz.so
-	ln -sfv ../../lib/libz.so.1.2.3 /usr/lib/libz.so
-
-	make clean
+	startStep zlib-1.2.13
+	tar -xf zlib-1.2.13.tar.gz ; cd zlib-1.2.13
 	./configure --prefix=/usr
-
 	make
-
-	# Abud - needs visual check
-	if [ DD${MKTEST}DD = DDYESDD ]
-	then
-		make check &> ${LOGS}/check-${LFSSTEP}-2.log
-	fi
-
 	make install
 
-	chmod -v 644 /usr/lib/libz.a
-
-	cd /sources; rm -rf zlib-1.2.3
+	cd /sources; rm -rf zlib-1.2.13
 
 # 6.12. Binutils-2.19.1
 # Upgraded to
@@ -1334,21 +1309,6 @@ EOF
 	startStep 6.49-module-init-tools-3.12
 	tar -xjf module-init-tools-3.12.tar.bz2 ; cd module-init-tools-3.12
 
-
-	# Abud - needs visual check
-	if [ DD${MKTEST}DD = DDYESDD ]
-	then
-		# fixme
-		./configure
-		true
-		make check
-		./tests/runtests
-		#
-		#	????
-		#
-		make clean
-	fi
-
 	DOCBOOKTOMAN=/bin/true ./configure --prefix=/ --enable-zlib --mandir=/usr/share/man
 	make
 	make INSTALL=install install
@@ -1815,7 +1775,7 @@ EOF
 Welcome to AbdLFS
 
    - /usr is a read-only squashed file-system.
-   - Large packages can be installed in per package directories in /opt
+   - Large packages can be installed in a per package directories in /opt
    - Remember:
    -    Reboot will remove everything installed in /opt
    -    To make it permanent move to /storage/0/AbdLFSExtras and devmount will make apropriate links

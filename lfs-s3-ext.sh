@@ -897,6 +897,44 @@ EOF
 	cd ..
 	rm -rf libcaca-0.99.beta19
 
+# Added
+# figlet-2.2.5
+# From ftp://ftp.figlet.org/pub/figlet/program/unix/figlet-2.2.5.tar.gz
+
+	startStep figleg-2.2.5
+	tar -xf figlet-2.2.5.tar.gz
+	cd figlet-2.2.5
+
+	sed -i 's#prefix[[:space:]]*=.*#prefix  = /usr#'  Makefile
+	sed -i 's#-Wall#-Wall -Wno-unused-value#' Makefile
+
+	make
+	make install
+
+	strip --strip-all /usr/bin/figlet /usr/bin/chkfont
+
+	cd ..
+	rm -rf figleg-2.2.5
+
+# Added
+# toilet-0.3
+# From http://caca.zoy.org/raw-attachment/wiki/toilet/toilet-0.3.tar.gz
+
+	startStep toilet-0.3
+	tar -xf toilet-0.3.tar.gz
+	cd toilet-0.3
+
+	./configure --prefix=/usr
+
+	make
+	make install
+
+	strip --strip-all /usr/bin/toilet
+
+	cd ..
+	rm -rf toilet-0.3
+	
+
 # Added 2026-07-13
 # libevent-2.1.13-stable.tar.gz
 # from https://github.com/libevent/libevent/releases/download/release-2.1.13-stable/libevent-2.1.13-stable.tar.gz
@@ -960,7 +998,7 @@ EOF
 	# /usr/local => /usr in Makefile
 	sed -ie 's#/usr/local#/usr#' Makefile
 
-	make linux
+	make linux MYCFLAGS="-fPIC"
 	make install
 
 	strip --strip-all /usr/bin/lua /usr/bin/luac
@@ -1049,6 +1087,14 @@ EOF
 	# Install a default localtime
 	cp -av /devsetup/default-localtime /etc/localtime
 
+# Updated motd after toilet
+
+	startStep "Update motd after toilet"
+
+	mv /etc/motd /etc/motd.orig
+	echo "" > /etc/motd
+	toilet --gay -f slant "Welcome to abdLFS" -w 120 | sed -e 's/^/   /' >> /etc/motd
+	tail -n +2 /etc/motd.orig >> /etc/motd
 
 # Added
 # sqshlabel
