@@ -345,6 +345,49 @@ EOF
 	tar -xzf ./logrotate-3.7.1.tar.gz; cd logrotate-3.7.1
 	make $MAKEJOBS
 	make install
+
+	mkdir -pv /etc/logrotate.d
+
+	cat > /etc/logrotate.conf << EOF
+# Default AbdLFS logrotate config
+weekly
+nomail
+notifempty
+rotate 5
+create 0664 root sys
+compress
+
+/var/log/wtmp {
+    monthly
+    create 0664 root utmp
+    rotate 2
+}
+
+include /etc/logrotate.d
+EOF
+
+	cat > /etc/logrotate.d/sys.log << EOF
+/var/log/all.log {
+   size   200k
+   rotate 5
+   weekly
+   postrotate
+      /bin/killall -HUP syslogd
+   endscript
+}
+EOF
+
+
+	chmod -v 0644 /etc/logrotate.conf
+	chmod -v 0644 /etc/logrotate.d/sys.log
+
+	# Adding cron entry
+	cat > /etc/cron.d/logrotate << 'EOF'
+0 4 * * * root /usr/sbin/logrotate /etc/logrotate.conf
+EOF
+
+	chmod 644 /etc/cron.d/logrotate
+
 	cd $EXTRAS; rm -rf logrotate-3.7.1
 	
 # hdparm-7.7

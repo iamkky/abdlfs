@@ -4,7 +4,14 @@ set -e
 cdir=`pwd`
 SCRIPTNAME=${BASH_SOURCE[0]}
 
-echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
+# Colors :-)
+RED="\033[31m"
+RED="\033[31m"
+CYA="\033[36m"
+YEL="\033[33m"
+NOR="\033[0m"
+
+	echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 
 	error_trap() {
 		echo -e "   ERROR: Error trapped!   "
@@ -19,7 +26,7 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 		echo ""
 		echo " -h                               Help"
 		echo " -karch ARCH                      Kernel architecture to compile (x86|x86_64)"
-		echo " -ksource <kernel source dir>     Kernel source dir"
+		echo " -kversion <kernel version>       Kernel source dir"
 		echo ""
 		echo " BASE_CPIO          A cpio.gz file used as base to assemble the final system"
 		echo ""
@@ -46,9 +53,10 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 				;;
 			esac
 			;;
-		-ksource)
+		-kversion)
 			shift
-			KSOURCE=$1;
+			KVERSION=$1;
+			KSOURCE=linux-"$1";
 			shift
 			;;
 
@@ -75,7 +83,9 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 		exit 1
 	fi
 
-	if [ -z "$KARCH" -o "$KARCH" = "x86" ]; then
+	if [ -z "$KARCH" ]; then
+		TGT=`uname -i`
+	elif [ "$KARCH" = "x86" ]; then
 		TGT=i686
 	elif [ "$KARCH" = "x86_64" ]; then
 		TGT=x86_64
@@ -94,15 +104,20 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 	LFS_KERNEL_NAME="$LFS_BASE_NAME.k-$KARCH"
 
 	GCCTARGET=`gcc -dumpmachine`
-	NEWTARGET=$TGT-pc-linux-gnu
+	#NEWTARGET=$TGT-pc-linux-gnu
 	#NEWTARGET=$TGT-unknown-linux-gnu
 
-	echo "Cpio image: $LFS_CPIO_FULLPATH"
-	echo 
-	echo "LFS Basename: $LFS_BASE_NAME"
-	echo "Kenrel ARCH: $KARCH"
-	echo "Default gcc target: $GCCTARGET"
-	echo "New target: $NEWTARGET"
+	IMAGE_NAME="$LFS_BASE_NAME"-"$KVERSION"-"$TGT".bzImage
+
+	printf "$YEL""==============%*s\n" ""${#LFS_CPIO_FULLPATH}"" '' | tr ' ' '='
+	printf "$RED""Cpio image:   ""$CYA""$LFS_CPIO_FULLPATH\n"
+	printf "$RED""LFS Basename: ""$CYA""$LFS_BASE_NAME\n"
+	printf "$RED""Kernel ARCH:  ""$CYA""$KARCH\n"
+	printf "$RED""gcc target:   ""$CYA""$GCCTARGET\n"
+	#echo "New target: $NEWTARGET"
+	printf "$RED""Image Name:   ""$CYA""$IMAGE_NAME\n"
+	printf "$YEL""==============%*s\n" ""${#LFS_CPIO_FULLPATH}"" '' | tr ' ' '='
+	printf "$NOR\n"
 
 	localdir=`pwd`
 	cd "$KSOURCE"
@@ -142,11 +157,12 @@ echo "Starting: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
 
 	make $ARCHFLAG bzImage
 
-	if [ ! -f arch/x86/boot/bzImage ]; then
-		mv arch/x86/boot/bzImage "$localdir"/"$LFS_BASE_NAME"-"$KSOURCE"-"$KARC".bzImage
+	if [ -f arch/x86/boot/bzImage ]; then
+		echo "Image File: $IMAGE_NAME"
+		mv arch/x86/boot/bzImage "$localdir"/"$IMAGE_NAME"
+	else
+		echo "arch/x86/boot/bzImage not found"
+		exit 1
 	fi
 
-	cd "$localdir"
-
 	echo "DONE: $SCRIPTNAME $(date +%Y%m%d-%H%M%S)"
-
